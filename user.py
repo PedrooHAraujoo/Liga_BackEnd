@@ -21,3 +21,16 @@ def adicionar_usuario(nome, email, senha, cargo, equipe, instagram):
         print('Erro: O email já foi registrado.')
     finally:
         conn.close()
+def main():
+    print('Cadastro do usuário')
+
+    nome = input('Nome: ')
+    email = input('Email: ')
+    senha = input('Senha: ')
+    cargo = input('Cargo: ')
+    equipe = input('Equipe: ')
+    instagram = input('Instagram: ')
+    
+    adicionar_usuario(nome, email, senha, cargo, equipe, instagram)
+if __name__ == '__main__':
+    main()
