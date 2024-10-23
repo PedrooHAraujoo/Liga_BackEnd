@@ -1,3 +1,4 @@
+import sqlite3
 import bcrypt
 from database import conectar_banco
 
