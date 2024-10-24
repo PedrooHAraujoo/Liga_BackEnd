@@ -9,15 +9,24 @@ def adicionar_usuario(nome, email, senha, cargo, equipe, instagram):
         conn = conectar_banco()
         cursor = conn.cursor()
 
+        # Verifica se o email já existe no banco de dados
+        cursor.execute('SELECT * FROM usuarios WHERE email = ?', (email,))
+        usuario_existente = cursor.fetchone()
+
+        if usuario_existente:
+            return {'error': 'O email já foi registrado.', 'status': 'fail'}, 400
+        
+        # Se o email não existe, insere o novo usuário
         cursor.execute('''
             INSERT INTO usuarios (nome, email, senha, cargo, equipe, instagram)
             VALUES (?, ?, ?, ?, ?, ?);  
         ''', (nome, email, senha_hashed, cargo, equipe, instagram))
         
-        conn.commit()
-        print(f'Usuário {nome} foi adicionado com sucesso!')
-    except sqlite3.IntegrityError:
-
-        return {'error': 'O email já foi registrado.', 'status': 'fail'}
+        conn.commit()  # Confirma a transação
+        return {'message': f'Usuário {nome} foi adicionado com sucesso!', 'status': 'success'}, 201
+    
+    except sqlite3.Error as e:
+        return {'error': f'Ocorreu um erro no banco de dados: {str(e)}', 'status': 'fail'}, 500
+    
     finally:
-        conn.close()
+        conn.close()  # Fecha a conexão com o banco de dados
