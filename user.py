@@ -18,6 +18,6 @@ def adicionar_usuario(nome, email, senha, cargo, equipe, instagram):
         print(f'Usuário {nome} foi adicionado com sucesso!')
     except sqlite3.IntegrityError:
 
-        print('Erro: O email já foi registrado.')
+        return {'error': 'O email já foi registrado.', 'status': 'fail'}
     finally:
         conn.close()
