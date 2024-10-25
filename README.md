@@ -5,7 +5,7 @@ Este é um esboço preliminar do README para o projeto "APP LIGA COHAB", que est
 
 ## Visão Geral
 
-"APP LIGA COHAB" é um aplicativo projetado para gerenciar e acompanhar informações de ligas esportivas, com foco em fornecer atualizações de rankings em tempo real e outras métricas relevantes. O projeto ainda está na fase conceitual, e o objetivo principal é criar uma interface amigável que permita o registro de equipes, consulta de rankings e acompanhamento de pontuações.
+"APP LIGA COHAB" é um aplicativo projetado para gerenciar e acompanhar informações de ligas de premiação coorporativa, com foco em fornecer atualizações de rankings em tempo real e outras métricas relevantes. O projeto ainda está na fase conceitual, e o objetivo principal é criar uma interface amigável que permita o registro de equipes, consulta de rankings e acompanhamento de pontuações.
 
 ## Funcionalidades (Planejadas)
 
