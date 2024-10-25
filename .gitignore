@@ -1,0 +1,10 @@
+ 
+# Ignorar arquivos de ambiente
+.env
+
+# Ignorar dependências do Node.js
+node_modules/
+
+# Ignorar arquivos Python compilados
+__pycache__/
+*.pyc
