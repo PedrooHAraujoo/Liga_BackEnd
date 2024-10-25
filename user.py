@@ -30,3 +30,25 @@ def adicionar_usuario(nome, email, senha, cargo, equipe, instagram):
     
     finally:
         conn.close()  # Fecha a conexão com o banco de dados
+def redefinir_senha(email, nova_senha):
+    senha_hashed = bcrypt.hashpw(nova_senha.encode('UTF-8'), bcrypt.gensalt())
+
+    try:
+        conn = conectar_banco()
+        cursor = conn.cursor()
+
+        cursor.execute('SELECT * FROM usuarios WHERE email = ?', (email,))
+        usuario_existente = cursor.fetchone()
+
+        if not usuario_existente:
+            return{'error': 'Usuário não encontrado', "status" : 'fail'}, 404
+        cursor.execute('''
+                UPDATE usuarios SET senha = ? WHERE email = ?
+''',(senha_hashed, email))
+        
+        conn.commit()
+        return{'message' : 'Senha redefinida com sucesso!', 'status': 'sucess'},200
+    except sqlite3.Error as e:
+        return{'error' : f'Ocorreu um erro no banco de dados: {str(e)}', 'status': 'fail'}, 500
+    finally:
+        conn.close()    
