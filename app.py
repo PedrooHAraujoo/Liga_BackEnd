@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from user import adicionar_usuario
+from user import adicionar_usuario, redefinir_senha
 
 app = Flask(__name__)
 
@@ -22,6 +22,17 @@ def cadastrar():
 
     
     return jsonify(resultado), status_code
+@app.route('/redefinir_senha', methods=['POST'])
+def redefinir_senha_endpoint():
+    data = request.json
+    email = data.get('email')
+    nova_senha = data.get('nova_senha')
+
+    if not email or not nova_senha:
+        return jsonify({'error': 'Preencha o email e a nova senha!'}), 400
+    
+    resposta, status = redefinir_senha(email, nova_senha)
+    return jsonify(resposta), status                
 
 if __name__ == '__main__':
     app.run(debug=True)
