@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from models import db
-from user import adicionar_usuario, redefinir_senha
+from user import adicionar_usuario, login_usuario, redefinir_senha
 from dotenv import load_dotenv
 import os
 
