@@ -1,4 +1,7 @@
 import bcrypt
+import jwt
+import datetime
+from flask import current_app
 from models import db, Usuario
 
 def adicionar_usuario(nome, email, senha, cargo, equipe, instagram):
@@ -28,6 +31,7 @@ def adicionar_usuario(nome, email, senha, cargo, equipe, instagram):
         return {'error': f'Ocorreu um erro no banco de dados: {str(e)}', 'status': 'fail'}, 500
     
 def redefinir_senha(email, nova_senha):
+
     senha_hashed = bcrypt.hashpw(nova_senha.encode('UTF-8'), bcrypt.gensalt())
 
     try:
@@ -46,6 +50,7 @@ def redefinir_senha(email, nova_senha):
         db.session.rollback() # Reverte a transação 
 
         return{'error' : f'Ocorreu um erro no banco de dados: {str(e)}', 'status': 'fail'}, 500   
+
 def login_usuario(email, senha):
     try:
         # Consulta o usuário pelo email
@@ -57,9 +62,16 @@ def login_usuario(email, senha):
         
         # Verifica se a senha foi fornecida corresponde à senha armazenada
         if bcrypt.checkpw(senha.encode('utf-8'), usuario.senha):
-            return{'message': 'Login realizado com sucesso!', 'status': 'sucess'}, 200
+            token = gerar_token(usuario.id)
+            return{'token': token, 'status': 'sucess'}, 200
         else:
             return{'error': 'Credencias inválidas', 'status': 'fail'}, 401
     except Exception as e:
         return{"error": f'Ocorreu um erro no banco de dados: {str(e)}', 'status': 'fail'}, 500
-    
+
+def gerar_token(user_id):
+    payload ={
+        'sub': user_id,
+        'iat': datetime.datetime.utcnow(), # Registra o hor[ario em que o token foi gerado
+        'exp':
+    }    
