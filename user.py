@@ -46,4 +46,20 @@ def redefinir_senha(email, nova_senha):
         db.session.rollback() # Reverte a transação 
 
         return{'error' : f'Ocorreu um erro no banco de dados: {str(e)}', 'status': 'fail'}, 500   
+def login_usuario(email, senha):
+    try:
+        # Consulta o usuário pelo email
+        usuario = Usuario.query.filter_by(email=email).first()
+
+        # Verifica se o usuário foi encontrado
+        if not usuario:
+            return{'error': 'Usuário não encontrado', 'status': 'fail'}, 404
+        
+        # Verifica se a senha foi fornecida corresponde à senha armazenada
+        if bcrypt.checkpw(senha.encode('utf-8'), usuario.senha):
+            return{'message': 'Login realizado com sucesso!', 'status': 'sucess'}, 200
+        else:
+            return{'error': 'Credencias inválidas', 'status': 'fail'}, 401
+    except Exception as e:
+        return{"error": f'Ocorreu um erro no banco de dados: {str(e)}', 'status': 'fail'}, 500
     
