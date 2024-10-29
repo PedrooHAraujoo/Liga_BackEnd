@@ -2,11 +2,15 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-class Equipe(db.model):
+class Equipe(db.Model):  # db.Model para o ORM mapear a classe à tabela
     __tablename__ = 'equipes'
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String, nullable=False)
     tipo = db.Column(db.String, nullable=False)
+
+       # Relacionamento com Ranking e Pontuacao
+    rankings = db.relationship('Ranking', backref='equipe', lazy=True)
+    pontuacoes = db.relationship('Pontuacao', backref='equipe', lazy=True)
 class Ranking(db.Model):
     __tablename__ = 'rankings'
     id = db.Column(db.Integer, primary_key=True)
