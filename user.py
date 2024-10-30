@@ -3,6 +3,7 @@ import jwt
 import datetime
 from flask import current_app
 from models import db, Usuario
+import os
 
 def adicionar_usuario(nome, email, senha, cargo, equipe, instagram):
     senha_hashed = bcrypt.hashpw(senha.encode('utf-8'), bcrypt.gensalt())
@@ -73,5 +74,15 @@ def gerar_token(user_id):
     payload ={
         'sub': user_id,
         'iat': datetime.datetime.utcnow(), # Registra o hor[ario em que o token foi gerado
-        'exp':
-    }    
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1) # Token expira em 1 hora
+    }
+    return jwt.encode(payload, os.getenv('SECRET_KEY'), algorithm='HS256')
+
+def verificar_token(token):
+    try:
+        payload = jwt.decode(token, os.getenv('SECRET_KEY'), algorithms=['HS256'])
+        return payload['sub'] # Retorna o id do usuário
+    except jwt.ExpiredSignatureError:
+        return None
+    except jwt.InvalidTokenError:
+        return None

@@ -1,9 +1,11 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from models import db
-from user import adicionar_usuario, login_usuario, redefinir_senha
+from user import adicionar_usuario, login_usuario, redefinir_senha, verificar_token
 from dotenv import load_dotenv
 import os
+import jwt
+from functools import wraps
 
 # Carrega as variáveis de ambiente
 load_dotenv()
@@ -13,10 +15,27 @@ app = Flask(__name__)
 # Configurações do banco de dados a partir do .env
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY') # Chave secreta JWT
 
 # Inicializa o SQLAlchemy com o app
 db.init_app(app)
 
+def jwt_required(f):
+    @wraps(f) # Decorador do Python que preserva as informações originais da função decorada
+    def decorated_function(*args, **kwargs):
+        token = request.headers.get('Authorization')
+        if not token:
+            return jsonify({'error': 'Token não fornecido!'}), 401
+        try:
+            # Extrai o token do header Authorization
+            token = token.split('')[1]if '' in token else token
+            user_id = verificar_token(token)
+            if not user_id:
+                return jsonify({'error': 'Token inválido ou expirado!'}), 401
+        except Exception as e:
+            return jsonify({'error': f'Erro na autenticação: {str(e)}'}), 401
+        return f(user_id, *args, **kwargs)
+    return decorated_function
 # Rota para cadastro de usuário
 @app.route('/cadastrar', methods=['POST'])
 def cadastrar():
