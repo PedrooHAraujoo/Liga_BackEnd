@@ -35,7 +35,7 @@ def cadastrar():
 
     resultado, status_code = adicionar_usuario(nome, email, senha, cargo, equipe, instagram)
     return jsonify(resultado), status_code
-
+# Rota para redefinir a senha
 @app.route('/redefinir_senha', methods=['POST'])
 def redefinir_senha_endpoint():
     data = request.json
@@ -48,7 +48,7 @@ def redefinir_senha_endpoint():
     resposta, status = redefinir_senha(email, nova_senha)
     return jsonify(resposta), status
 
-# Nova rota de login
+# Rota de login
 @app.route('/login', methods=['POST'])
 def login():
     data = request.json
