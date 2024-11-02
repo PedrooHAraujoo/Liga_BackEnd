@@ -99,6 +99,7 @@ def editar_perfil(user_id):
     resultado, status_code = atualizar_usuario(user_id, nome, email, instagram)
     return jsonify(resultado), status_code
 
+# Rota para os uploads das imagens
 @app.route('/perfil/upload_imagem', methods=['POST'])
 @jwt_required
 def upload_imagem(user_id):
