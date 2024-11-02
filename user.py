@@ -86,3 +86,25 @@ def verificar_token(token):
         return None
     except jwt.InvalidTokenError:
         return None
+
+def obter_usuario(user_id):
+    try:
+        # Consulta o usuário pelo id
+
+        usuario = Usuario.query.get(user_id)
+        if not usuario:
+            return {'error': 'Usuário não encontrado', 'status': 'fail'}, 404
+        
+        # Retorna os dados do usuário em formato JSON
+        return {
+            'id': usuario.id,
+            'nome': usuario.nome,
+            'email': usuario.email,
+            'cargo': usuario.cargo,
+            'equipe': usuario.equipe,
+            'instagram': usuario.instagram,
+            'status': 'sucess'
+        }, 200
+    except Exception as e:
+        return {'error': f'Ocorreu um erro no banco de dados: {str(e)}', 'status': 'fail'}, 500
+    
