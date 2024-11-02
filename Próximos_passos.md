@@ -1,60 +1,50 @@
-1. Autenticação
+## Funcionalidades
 
-Token JWT (JSON Web Token): Implementar autenticação usando JWT para gerenciar sessões de forma mais segura.
+### Autenticação
+- **Token JWT (JSON Web Token)**: Implementa autenticação usando JWT para gerenciar sessões de forma mais segura.
+- **Proteção de Rotas**: Adiciona decoradores para proteger rotas que exigem autenticação, permitindo acesso apenas a usuários logados.
 
-Proteção de Rotas: Adicionar decoradores para proteger rotas que requerem autenticação, permitindo acesso apenas a usuários logados.
+### Gerenciamento de Perfis
+- **Visualização e Edição de Perfil**: Permite a visualização e edição de informações de perfil, como nome, email e Instagram.
+- **Upload de Imagem de Perfil**: Adiciona funcionalidade para carregar fotos de perfil.
 
+### Controle de Acesso por Cargos
+- **Definição de Cargos e Permissões**: Estrutura de cargos (Admin, Gerente, Corretor, Suporte) com permissões específicas para controlar o que cada usuário pode acessar.
+  - **Admin**: Acesso total, incluindo gerenciamento de usuários e logs de atividades.
+  - **Gerente**: Acesso a rankings, histórico de pontuações e visualização de informações de equipe.
+  - **Corretor**: Acesso à visualização de rankings e pontuações.
+  - **Suporte**: Visualização de informações de usuários para auxílio em problemas técnicos.
+- **Proteção de Rotas Baseada em Cargos**: Utiliza decoradores para verificar o cargo e permitir ou negar acesso a funcionalidades específicas.
+- **Painel de Configuração de Permissões**: Painel onde as permissões podem ser configuradas e ajustadas sem necessidade de modificar o código.
 
-2. Gerenciamento de Perfis
+### Funções de Gerenciamento
+- **Painel de Administração**: Painel para gerenciar usuários, incluindo a possibilidade de desativar ou excluir contas.
+- **Logs de Atividades**: Registro de atividades, como logins, cadastros e alterações no perfil.
 
-Visualização e Edição de Perfil: Permitir a visualização e edição de informações de perfil, como nome, email e Instagram.
+### Melhorias de Usabilidade
+- **Validação de Formulários**: Validação de dados no frontend para fornecer feedback em tempo real.
+- **Mensagens de Erro Mais Detalhadas**: Fornecimento de mensagens de erro mais específicas e úteis.
 
-Upload de Imagem de Perfil: Adicionar funcionalidade para carregar fotos de perfil.
+### Funcionalidades de Ranking
+- **Visualização de Rankings**: Endpoints para visualizar rankings de equipes ou pontuações.
+- **Histórico de Pontuações**: Visualização do histórico de pontuações e comparações com outros usuários.
 
+### Interação Social
+- **Sistema de Comentários**: Implementação de um sistema de comentários sobre pontuações ou conquistas.
+- **Notificações**: Sistema de notificações para manter os usuários informados sobre atualizações ou interações.
 
-3. Funções de Gerenciamento
+### Integração com APIs Externas
+- **Integração com Redes Sociais**: Login com contas de redes sociais, como Google ou Facebook.
+- **Analytics**: Ferramentas de análise para monitorar o uso do aplicativo e identificar áreas de melhoria.
 
-Painel de Administração: Criar um painel para gerenciar usuários, incluindo a possibilidade de desativar ou excluir contas.
+### Testes e Documentação
+- **Testes Automatizados**: Testes para rotas e funcionalidades, garantindo que tudo funcione conforme o esperado.
+- **Documentação da API**: Documentação usando ferramentas como Swagger ou Postman, facilitando o uso por desenvolvedores.
 
-Logs de Atividades: Manter registro das atividades, como logins, cadastros e alterações no perfil.
+### Segurança
+- **Melhorias de Segurança**: Revisão e melhoria das práticas de segurança, como limitar tentativas de login e implementar verificação em duas etapas (2FA).
 
+### Deploy
+- **Hospedagem do Aplicativo**: Consideração para a implantação do aplicativo em plataformas como Heroku, DigitalOcean ou AWS para acessibilidade.
 
-4. Melhorias de Usabilidade
-
-Validação de Formulários: Melhorar a validação de dados no frontend para fornecer feedback em tempo real.
-
-Mensagens de Erro Mais Detalhadas: Fornecer mensagens de erro mais específicas e úteis.
-
-
-5. Funcionalidades de Ranking
-
-Visualização de Rankings: Criar endpoints para visualizar rankings de equipes ou pontuações.
-
-Histórico de Pontuações: Permitir a visualização do histórico de pontuações e comparações com outros.
-
-
-6. Interação Social
-
-Sistema de Comentários: Implementar um sistema de comentários sobre pontuações ou conquistas.
-
-Notificações: Criar um sistema de notificações para manter os usuários informados sobre atualizações ou interações.
-
-7. Integração com APIs Externas
-
-Integração com Redes Sociais: Permitir login com contas de redes sociais como Google ou Facebook.
-
-Analytics: Utilizar ferramentas de análise para monitorar o uso do aplicativo e identificar áreas de melhoria.
-
-
-8. Testes e Documentação
-Testes Automatizados: Escrever testes para rotas e funcionalidades, garantindo que tudo funcione conforme o esperado.
-
-Documentação da API: Usar ferramentas como Swagger ou Postman para documentar a API, facilitando o uso por desenvolvedores.
-
-9. Segurança
-
-Melhorias de Segurança: Revisar e melhorar as práticas de segurança, como limitar tentativas de login e implementar verificação em duas etapas (2FA).
-
-10. Deploy
-
-Hospedagem do Aplicativo: Considerar a implantação do aplicativo em plataformas como Heroku, DigitalOcean ou AWS para acessibilidade.
+---
