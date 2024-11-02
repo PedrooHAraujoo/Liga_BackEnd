@@ -3,6 +3,7 @@ import jwt
 import datetime
 from flask import current_app
 from models import db, Usuario
+from werkzeug.utils import secure_filename
 import os
 
 def adicionar_usuario(nome, email, senha, cargo, equipe, instagram):
@@ -108,3 +109,35 @@ def obter_usuario(user_id):
     except Exception as e:
         return {'error': f'Ocorreu um erro no banco de dados: {str(e)}', 'status': 'fail'}, 500
     
+def atualizar_usuario(user_id, nome, email, instagram):
+    try:
+        usuario = Usuario.query.get(user_id)
+        if not usuario:
+            return {'error': 'Usuário não encontrado'}, 404
+        usuario.nome = nome if nome else usuario.nome
+        usuario.email = email if email else usuario.email
+        usuario.instagram = instagram if instagram else usuario.instagram
+        db.session.commit()
+        
+        return{'message': 'Perfil atualizado com sucesso!'}, 200
+    except Exception as e:
+        return {'error': f'Ocorreu um erro ao atualizar o perfil: {str(e)}'}, 500
+    
+def salvar_imagem_perfil(user_id, imagem, upload_folder):
+    try:
+        # Define um nome seguro para o arquivo, incluindo o ID do usuário
+
+        filename = secure_filename(f'{user_id}_{imagem.filename}')
+        filepath = os.path.join(upload_folder, filename)
+
+        # Salva a imagem no caminho especificado(upload_folder/ filename)
+        imagem.save(filepath)
+    
+        # Salvar caminho no banco de dados
+        usuario = Usuario.query.get(user_id)
+        usuario.imagem_perfil = filepath
+        db.session.commit()
+
+        return {'message': 'Imagem enviada com sucesso!', 'imagem_url': filepath}, 200
+    except Exception as e:
+        return {'error': f'Error ao salvar a imagem: {str(e)}'}, 500

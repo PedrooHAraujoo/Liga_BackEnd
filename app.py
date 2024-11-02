@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from models import db
-from user import adicionar_usuario, login_usuario, redefinir_senha, verificar_token, obter_usuario
+from user import adicionar_usuario, login_usuario, redefinir_senha, verificar_token, obter_usuario, atualizar_usuario, salvar_imagem_perfil
 from dotenv import load_dotenv
 import os
 import jwt
@@ -87,6 +87,29 @@ def login():
 def visualizar_perfil(user_id):
     resposta, status = obter_usuario(user_id)
     return jsonify(resposta), status
+
+# Rota para editar o perfil
+@app.route('/perfil/editar', method=["PUT"])
+@jwt_required
+def editar_perfil(user_id):
+    data = request.json
+    nome = data.get('nome')
+    email = data.get('email')
+    instagram = data.get('instagram')
+    resultado, status_code = atualizar_usuario(user_id, nome, email, instagram)
+    return jsonify(resultado), status_code
+
+@app.route('/perfil/upload_imagem', methods=['POST'])
+@jwt_required
+def upload_imagem(user_id):
+    if 'imagem' not in request.files:
+        return jsonify({'error': 'Nenhum imagem foi enviada!'}), 400
+    imagem = request.files['Imagem']
+    if imagem.filename == '':
+        return jsonify({'error': 'Nome do arquivo inválido!'}), 400
+    
+    resultdo, status = salvar_imagem_perfil(user_id, imagem, app.config['UPLOAD_FOLDER'])
+    return jsonify(resultdo), status
 
 # Criação do banco de dados com as tabelas
 with app.app_context():                
