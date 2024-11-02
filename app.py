@@ -1,11 +1,12 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from models import db
-from user import adicionar_usuario, login_usuario, redefinir_senha, verificar_token
+from user import adicionar_usuario, login_usuario, redefinir_senha, verificar_token, obter_usuario
 from dotenv import load_dotenv
 import os
 import jwt
 from functools import wraps
+from werkzeug.utils import secure_filename
 
 # Carrega as variáveis de ambiente
 load_dotenv()
@@ -16,19 +17,20 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY') # Chave secreta JWT
+app.config['UPLOAD_FOLDER'] = 'uploads/'
 
 # Inicializa o SQLAlchemy com o app
 db.init_app(app)
-
+# Decorador para verificar JWT
 def jwt_required(f):
-    @wraps(f) # Decorador do Python que preserva as informações originais da função decorada
+    @wraps(f) # Preserva as informações originais da função decorada
     def decorated_function(*args, **kwargs):
         token = request.headers.get('Authorization')
         if not token:
             return jsonify({'error': 'Token não fornecido!'}), 401
         try:
             # Extrai o token do header Authorization
-            token = token.split('')[1]if '' in token else token
+            token = token.split(' ')[1]if ' ' in token else token
             user_id = verificar_token(token)
             if not user_id:
                 return jsonify({'error': 'Token inválido ou expirado!'}), 401
@@ -77,6 +79,13 @@ def login():
     if not email or not senha:
         return jsonify({'error': 'Preencha email e a senha!'}), 400
     resposta, status = login_usuario(email, senha)
+    return jsonify(resposta), status
+
+# Rota para o perfil
+@app.route('/perfil', methods=['GET'])
+@jwt_required
+def visualizar_perfil(user_id):
+    resposta, status = obter_usuario(user_id)
     return jsonify(resposta), status
 
 # Criação do banco de dados com as tabelas
