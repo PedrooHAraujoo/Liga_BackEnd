@@ -8,7 +8,7 @@ class Equipe(db.Model):  # db.Model para o ORM mapear a classe à tabela
     nome = db.Column(db.String, nullable=False)
     tipo = db.Column(db.String, nullable=False)
 
-       # Relacionamento com Ranking e Pontuacao
+    # Relacionamento com Ranking e Pontuacao
     rankings = db.relationship('Ranking', backref='equipe', lazy=True)
     pontuacoes = db.relationship('Pontuacao', backref='equipe', lazy=True)
     usuarios = db.relationship('Usuario', backref='equipe', lazy=True)
@@ -36,6 +36,26 @@ class Cargo(db.Model):
     
     # Relacionamento com um Usuário
     usuarios = db.relationship('Usuario', backref='cargo', lazy=True)
+
+class Permissao(db.Model):
+    __tablename__ = 'permissoes'
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(50), unique=True, nullable=False)
+    descricao = db.Column(db.String(255), nullable=True)
+
+    # Relacionamento para vincular Cargos a Permissões
+    cargos = db.relationship('CargoPermissao', back_populates='permissao', lazy=True)
+
+class CargoPermissao(db.Model):
+    __tablename__ = 'cargo_permissao'
+    id = db.Column(db.Integer, primary_key=True)
+    cargo_id = db.Column(db.Integer, db.ForeignKey('cargos.id'), nullable=False)
+    permissao_id = db.Column(db.Integer, db.ForeignKey('permissoes.id'), nullable=False)
+
+    # Relacionamento com as tabelas Cargos e Permissões
+    cargo = db.relationship('Cargo', back_populates='permissoes')
+    permissao = db.relationship('Permissao', back_populates='cargos')
+
 
 class Usuario(db.Model):
     __tablename__ = 'usuarios'
