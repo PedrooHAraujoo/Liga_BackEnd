@@ -36,6 +36,7 @@ class Cargo(db.Model):
     
     # Relacionamento com um Usuário
     usuarios = db.relationship('Usuario', backref='cargo', lazy=True)
+    permissoes = db.relationship('CargoPermissao', back_populates='cargo', lazy=True)
 
 class Permissao(db.Model):
     __tablename__ = 'permissoes'
