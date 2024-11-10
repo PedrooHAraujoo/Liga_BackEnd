@@ -2,7 +2,7 @@ import bcrypt
 import jwt
 import datetime
 from flask import current_app
-from models import db, Usuario
+from models import db, Usuario, Cargo, Equipe
 from werkzeug.utils import secure_filename
 import os
 
@@ -14,6 +14,13 @@ def adicionar_usuario(nome, email, senha, cargo, equipe, instagram):
         usuario_existente = Usuario.query.filter_by(email=email).first()
         if usuario_existente:
             return {'error': 'O email já foi registrado.', 'status': 'fail'}, 400
+       
+        # Verifica se o cargo e equipe são válidos
+        cargo_existente = Cargo.query.get(cargo)
+        equipe_existente = Equipe.query.get(equipe)
+        if not cargo_existente or not equipe_existente:
+            return {'error': 'Cargo ou equipe inválidos!', 'status': 'fail'}, 400
+       
        # Se o email não existe cria um novo usuário
         novo_usuario = Usuario(
             nome=nome,
@@ -65,7 +72,7 @@ def login_usuario(email, senha):
         # Verifica se a senha foi fornecida corresponde à senha armazenada
         if bcrypt.checkpw(senha.encode('utf-8'), usuario.senha):
             token = gerar_token(usuario.id)
-            return{'token': token, 'status': 'sucess'}, 200
+            return{'token': token, 'status': 'success'}, 200
         else:
             return{'error': 'Credencias inválidas', 'status': 'fail'}, 401
     except Exception as e:
