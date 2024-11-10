@@ -35,7 +35,7 @@ def verificar_permissao(permissao_necessaria):
                 cargo = usuario.cargo
                 permissoes_do_cargo = permissoes.get(cargo, [])
                 if permissao_necessaria not in permissoes_do_cargo:
-                    return jsonify({'error': 'Acesso negado!'}), 403
+                    return jsonify({'error': f'Acesso negado! Cargo {cargo} não possui a permissão {permissao_necessaria}.'}), 403
             except Exception as e:
                 return jsonify({'error': f'Erro na autenticação: {str(e)}'}), 401
             
