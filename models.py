@@ -9,9 +9,9 @@ class Equipe(db.Model):  # db.Model para o ORM mapear a classe à tabela
     tipo = db.Column(db.String, nullable=False)
 
     # Relacionamento com Ranking e Pontuacao
-    rankings = db.relationship('Ranking', backref='equipe', lazy=True)
-    pontuacoes = db.relationship('Pontuacao', backref='equipe', lazy=True)
-    usuarios = db.relationship('Usuario', backref='equipe', lazy=True)
+    rankings = db.relationship('Ranking', back_populates='equipe', lazy=True)
+    pontuacoes = db.relationship('Pontuacao', back_populates='equipe', lazy=True)
+    usuarios = db.relationship('Usuario', back_populates='equipe', lazy=True)
 
 class Ranking(db.Model):
     __tablename__ = 'rankings'
@@ -64,6 +64,7 @@ class Usuario(db.Model):
     nome = db.Column(db.String, nullable=False)
     email = db.Column(db.String, nullable=False, unique=True)
     senha = db.Column(db.String, nullable=False)
+    status = db.Column(db.String, default='pendente', nullable=False)
 
     # Relacionamento com Cargo e Equipe
     cargo_id = db.Column(db.Integer, db.ForeignKey('cargos.id'), nullable=False)
