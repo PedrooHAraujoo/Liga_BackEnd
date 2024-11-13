@@ -20,6 +20,9 @@ class Ranking(db.Model):
     tipo_ranking = db.Column(db.String, nullable=False) 
     pontuacao_total = db.Column(db.Integer, nullable=False)
 
+    # Relacionamento com Equipe
+    equipe = db.relationship('Equipe', back_populates='rankings')
+
 class Pontuacao(db.Model):
     __tablename__ = 'pontuacoes'
     id = db.Column(db.Integer, primary_key=True)
@@ -28,6 +31,8 @@ class Pontuacao(db.Model):
     equipe_id = db.Column(db.Integer, db.ForeignKey('equipes.id'), nullable=False)
     data = db.Column(db.Date, nullable=False)
 
+    # Relacionamento comm Equipe
+    equipe = db.relationship('Equipe', back_populates='pontuacoes')
 class Cargo(db.Model):
     __tablename__ = 'cargos'
     id = db.Column(db.Integer, primary_key=True)
@@ -69,7 +74,8 @@ class Usuario(db.Model):
     # Relacionamento com Cargo e Equipe
     cargo_id = db.Column(db.Integer, db.ForeignKey('cargos.id'), nullable=False)
     equipe_id  = db.Column(db.Integer, db.ForeignKey('equipes.id'),nullable=False)
-
+    equipe = db.relationship('Equipe', back_populates='usuarios')
+    
     instagram = db.Column(db.String, nullable=False)
 
     def __repr__(self):
