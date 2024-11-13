@@ -8,3 +8,5 @@ node_modules/
 # Ignorar arquivos Python compilados
 __pycache__/
 *.pyc
+*venv
+*back-end-cohab
