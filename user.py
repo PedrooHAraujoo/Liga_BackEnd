@@ -16,18 +16,19 @@ def adicionar_usuario(nome, email, senha, cargo, equipe, instagram):
             return {'error': 'O email já foi registrado.', 'status': 'fail'}, 400
        
         # Verifica se o cargo e equipe são válidos
-        cargo_existente = Cargo.query.get(cargo)
-        equipe_existente = Equipe.query.get(equipe)
+        cargo_existente = Cargo.query.filter_by(nome=cargo).first()
+        equipe_existente = Equipe.query.filter_by(nome=equipe).first()
         if not cargo_existente or not equipe_existente:
-            return {'error': 'Cargo ou equipe inválidos!', 'status': 'fail'}, 400
+         return {'error': f'Cargo ou equipe inválidos: {cargo}, {equipe}', 'status': 'fail'}, 400
+
        
        # Se o email não existe cria um novo usuário
         novo_usuario = Usuario(
             nome=nome,
             email=email,
             senha=senha_hashed,
-            cargo=cargo,
-            equipe=equipe,
+            cargo=cargo_existente, # Associa a instância de Cargo
+            equipe=equipe_existente, # Associa a instância de Equipe
             instagram=instagram
         )
         

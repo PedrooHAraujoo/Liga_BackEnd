@@ -40,7 +40,7 @@ def cadastar():
     if not nome or not email or not senha or not cargo or not equipe or not instagram:
         return jsonify({'error': 'Preencha todos os campos!'}), 400
     
-    resultado, status_code = adicionar_usuario(nome, senha, email, cargo, equipe, instagram)
+    resultado, status_code = adicionar_usuario(nome, email, senha, cargo, equipe, instagram)
     return jsonify(resultado), status_code
 
 # Rota para redefinir a senha
