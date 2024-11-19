@@ -81,20 +81,31 @@ def login_usuario(email, senha):
 
 def gerar_token(user_id):
     payload ={
-        'sub': user_id,
+        'sub': str(user_id),
         'iat': datetime.datetime.utcnow(), # Registra o hor[ario em que o token foi gerado
         'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1) # Token expira em 1 hora
     }
-    return jwt.encode(payload, os.getenv('SECRET_KEY'), algorithm='HS256')
+    token = jwt.encode(payload, os.getenv('SECRET_KEY'),'HS256')
+    return token
 
 def verificar_token(token):
     try:
-        payload = jwt.decode(token, os.getenv('SECRET_KEY'), algorithms=['HS256'])
-        return payload['sub'] # Retorna o id do usuário
+        print(f"Token completo: {token}")
+        decoded = jwt.decode(
+            token, 
+            os.getenv('SECRET_KEY'), 
+            algorithms=['HS256'],
+        )
+        
+        return int(decoded.get('sub')) # Retorna o id do usuário
+    
     except jwt.ExpiredSignatureError:
+        print("Token expirado") 
         return None
-    except jwt.InvalidTokenError:
+    except jwt.InvalidTokenError as e:
+        print(f"Erro de token: {type(e)} - {e}")
         return None
+
 
 def obter_usuario(user_id):
     try:
