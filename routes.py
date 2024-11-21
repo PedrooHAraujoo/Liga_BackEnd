@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, current_app
 from functools import wraps
 from werkzeug.utils import secure_filename
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import Usuario
 from user import (
     adicionar_usuario, login_usuario, redefinir_senha, verificar_token, 
@@ -68,11 +69,39 @@ def login():
     return jsonify(reposta), status
 
 # Rota para o perfil do usuario
+from flask import jsonify
+
+from models import Usuario  # Certifique-se de que o modelo está importado
+
 @app_routes.route('/perfil', methods=['GET'])
-@jwt_required
-def visualizar_perfil(user_id):
-    resposta, status = obter_usuario(user_id)
-    return jsonify(resposta), status
+@jwt_required()
+def visualizar_perfil():
+    try:
+        # Obtém o ID do usuário do token JWT
+        user_id = get_jwt_identity()
+        
+        # Busca o usuário no banco de dados
+        usuario = Usuario.query.get(user_id)
+
+        if not usuario:
+            return jsonify({"erro": "Usuário não encontrado"}), 404
+
+        # Retorna o perfil do usuário como JSON
+        return jsonify({
+            "id": usuario.id,
+            "nome": usuario.nome,
+            "email": usuario.email,
+            "status": usuario.status,
+            "equipe": usuario.equipe.nome if usuario.equipe else None,
+            "cargo": usuario.cargo.nome if usuario.cargo else None,
+            "instagram": usuario.instagram
+        }), 200
+
+    except Exception as e:
+        # Loga e retorna o erro
+        print(f"Erro ao acessar perfil: {e}")
+        return jsonify({"erro": "Erro ao acessar perfil"}), 500
+
 
 # Rota para editar o perfil
 @app_routes.route('/perfil/editar', methods=['PUT'])
