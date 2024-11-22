@@ -12,6 +12,13 @@ class Equipe(db.Model):  # db.Model para o ORM mapear a classe à tabela
     rankings = db.relationship('Ranking', back_populates='equipe', lazy=True)
     pontuacoes = db.relationship('Pontuacao', back_populates='equipe', lazy=True)
     usuarios = db.relationship('Usuario', back_populates='equipe', lazy=True)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'nome': self.nome,
+            'tipo': self.tipo
+        }
 
 class Ranking(db.Model):
     __tablename__ = 'rankings'
@@ -42,6 +49,13 @@ class Cargo(db.Model):
     # Relacionamento com um Usuário
     usuarios = db.relationship('Usuario', backref='cargo', lazy=True)
     permissoes = db.relationship('CargoPermissao', back_populates='cargo', lazy=True)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'nome': self.nome,
+            'descricao': self.descricao
+        }
 
 class Permissao(db.Model):
     __tablename__ = 'permissoes'
@@ -78,5 +92,16 @@ class Usuario(db.Model):
     
     instagram = db.Column(db.String, nullable=False)
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'nome': self.nome,
+            'email': self.email,
+            'status': self.status,
+            'cargo': self.cargo.to_dict() if self.cargo else None,
+            'equipe': self.equipe.to_dict() if self.equipe else None,
+            'instagram': self.instagram
+        }
+        
     def __repr__(self):
         return f'<Usuario {self.nome}>'
