@@ -115,6 +115,7 @@ def obter_usuario(user_id):
         if not usuario:
             return {'error': 'Usuário não encontrado', 'status': 'fail'}, 404
         
+        # passa os dados_usuario para o método to_dict()
         dados_usuario = usuario.to_dict()
         dados_usuario['status'] = 'success'
         
@@ -134,6 +135,7 @@ def atualizar_usuario(user_id, nome, email, instagram):
         usuario.instagram = instagram if instagram else usuario.instagram
         db.session.commit()
         
+        # Retorna os dados atualizados passando pelo metodo to_dict()
         dados_usuario = usuario.to_dict()
         dados_usuario['message'] = 'Perfil atualizado com sucesso!'
         dados_usuario['status'] = 'success'

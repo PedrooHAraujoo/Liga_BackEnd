@@ -50,6 +50,7 @@ class Cargo(db.Model):
     usuarios = db.relationship('Usuario', backref='cargo', lazy=True)
     permissoes = db.relationship('CargoPermissao', back_populates='cargo', lazy=True)
     
+    # Adicionei um método para Serialização para cada Classe.  
     def to_dict(self):
         return {
             'id': self.id,
@@ -105,3 +106,8 @@ class Usuario(db.Model):
         
     def __repr__(self):
         return f'<Usuario {self.nome}>'
+   
+    # Obs. 
+    # Pesquisei, e existe maneiras mais enxutas para serialização de 
+    # objetos para JSON em Python usando a Biblioteca marshmallow, pode reduzir a repetição de código. 
+    
