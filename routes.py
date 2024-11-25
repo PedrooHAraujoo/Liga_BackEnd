@@ -1,3 +1,4 @@
+import os
 from flask import Blueprint, request, jsonify, current_app
 from functools import wraps
 from flask_jwt_extended import jwt_required, get_jwt_identity
