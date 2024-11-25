@@ -1,6 +1,5 @@
 from flask import Blueprint, request, jsonify, current_app
 from functools import wraps
-from werkzeug.utils import secure_filename
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import Usuario
 from user import (
@@ -119,12 +118,22 @@ def editar_perfil(user_id):
 @jwt_required
 def upload_imagem(user_id):
     if 'imagem' not in request.files:
-        return jsonify({'error': 'Nenhuma imagem foi enviada!'}), 400
+        return jsonify({
+            'status': 'error',
+            'message': 'Nenhuma imagem foi enviada'
+        }), 400
     imagem = request.files['imagem']
     if imagem.filename == '':
-        return jsonify({'error': 'Nome do arquivo inválido!'}), 400
+        return jsonify({
+            'status': 'error',
+            'message': 'Nome do arquivo inválido'
+        }), 400
     
     # Usa a configuração do UPLOAD_FOLDER do app principal
     upload_folder = current_app.config['UPLOAD_FOLDER']
     resultado, status = salvar_imagem_perfil(user_id, imagem, upload_folder)
+
+    # Retorna a URl acessível, se o upload for bem sucedido
+    if status == 200:
+        resultado['imagem_url'] = f'/api/uploads/{os.path.basename(resultado['imagem_url'])}'
     return jsonify(resultado), status

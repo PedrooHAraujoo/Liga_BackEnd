@@ -4,6 +4,7 @@ import datetime
 from flask import current_app
 from models import db, Usuario, Cargo, Equipe
 from werkzeug.utils import secure_filename
+from flask import jsonify
 import os
 
 def adicionar_usuario(nome, email, senha, cargo, equipe, instagram):
@@ -145,11 +146,32 @@ def atualizar_usuario(user_id, nome, email, instagram):
     except Exception as e:
         db.session.rollback()
         return {'error': f'Ocorreu um erro ao atualizar o perfil: {str(e)}', 'status': 'fail'}, 500
-    
+
+def validar_extensao(arquivo):
+    # Extensões permitidas
+    extensoes_permitidas = ['png', 'jpg', 'jpeg']
+    # Extrai a extensão do arquivo
+    extensao = arquivo.rsplit('.', 1)[-1].lower()
+    # Verifica se a extensão está na lista de permitidas
+    return extensao in extensoes_permitidas
+
 def salvar_imagem_perfil(user_id, imagem, upload_folder):
     try:
-        # Define um nome seguro para o arquivo, incluindo o ID do usuário
+        
+        # Valida a extensão do arquivo
+        if not validar_extensao(imagem.filename):
+            return jsonify({
+                'status': 'error',
+                'message': 'A extensão do arquivo fornecido é inválido',
+                'details': 'Apenas arquivos com as extensões .png, . .jpg, .jpeg são permitidos'
+            }), 400
+        # Para uso de debug (para ver o valor de upload_folder)
+        print(f"UPLOAD_FOLDER: {upload_folder}")
+        # Certifica-se de que o diretório de upload existe
+        if not os.path.exists(upload_folder):
+            os.makedirs(upload_folder)
 
+        # Define um nome seguro para o arquivo, incluindo o ID do usuário
         filename = secure_filename(f'{user_id}_{imagem.filename}')
         filepath = os.path.join(upload_folder, filename)
 
@@ -158,9 +180,15 @@ def salvar_imagem_perfil(user_id, imagem, upload_folder):
     
         # Salvar caminho no banco de dados
         usuario = Usuario.query.get(user_id)
+        if not usuario:
+            return jsonify({
+                'status': 'error',
+                'message': 'Usuário não encontrado'
+            }), 404
         usuario.imagem_perfil = filepath
         db.session.commit()
 
         return {'message': 'Imagem enviada com sucesso!', 'imagem_url': filepath}, 200
     except Exception as e:
         return {'error': f'Error ao salvar a imagem: {str(e)}'}, 500
+    
