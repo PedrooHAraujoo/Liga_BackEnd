@@ -12,6 +12,13 @@ class Equipe(db.Model):
     rankings = db.relationship('Ranking', back_populates='equipe', lazy=True)
     pontuacoes = db.relationship('Pontuacao', back_populates='equipe', lazy=True)
     usuarios = db.relationship('Usuario', back_populates='equipe', lazy=True)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'nome': self.nome,
+            'tipo': self.tipo
+        }
 
     def to_dict(self):
         return {
@@ -72,6 +79,14 @@ class Cargo(db.Model):
     # Relacionamento com Usuario e Permissoes
     usuarios = db.relationship('Usuario', backref='cargo', lazy=True)
     permissoes = db.relationship('CargoPermissao', back_populates='cargo', lazy=True)
+    
+    # Adicionei um método para Serialização para cada Classe.  
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'nome': self.nome,
+            'descricao': self.descricao
+        }
 
     def to_dict(self):
         return {

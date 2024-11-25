@@ -115,16 +115,13 @@ def obter_usuario(user_id):
         if not usuario:
             return {'error': 'Usuário não encontrado', 'status': 'fail'}, 404
         
+        # passa os dados_usuario para o método to_dict()
+        dados_usuario = usuario.to_dict()
+        dados_usuario['status'] = 'success'
+        
         # Retorna os dados do usuário em formato JSON
-        return {
-            'id': usuario.id,
-            'nome': usuario.nome,
-            'email': usuario.email,
-            'cargo': usuario.cargo,
-            'equipe': usuario.equipe,
-            'instagram': usuario.instagram,
-            'status': 'sucess'
-        }, 200
+        return dados_usuario, 200
+    
     except Exception as e:
         return {'error': f'Ocorreu um erro no banco de dados: {str(e)}', 'status': 'fail'}, 500
     
@@ -138,9 +135,16 @@ def atualizar_usuario(user_id, nome, email, instagram):
         usuario.instagram = instagram if instagram else usuario.instagram
         db.session.commit()
         
-        return{'message': 'Perfil atualizado com sucesso!'}, 200
+        # Retorna os dados atualizados passando pelo metodo to_dict()
+        dados_usuario = usuario.to_dict()
+        dados_usuario['message'] = 'Perfil atualizado com sucesso!'
+        dados_usuario['status'] = 'success'
+        
+        return dados_usuario, 200
+        
     except Exception as e:
-        return {'error': f'Ocorreu um erro ao atualizar o perfil: {str(e)}'}, 500
+        db.session.rollback()
+        return {'error': f'Ocorreu um erro ao atualizar o perfil: {str(e)}', 'status': 'fail'}, 500
     
 def salvar_imagem_perfil(user_id, imagem, upload_folder):
     try:
