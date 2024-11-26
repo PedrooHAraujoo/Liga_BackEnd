@@ -74,7 +74,7 @@ from flask import jsonify
 from models import Usuario  # Certifique-se de que o modelo está importado
 
 @app_routes.route('/perfil', methods=['GET'])
-@jwt_required()
+@jwt_required
 def visualizar_perfil():
     try:
         # Obtém o ID do usuário do token JWT
@@ -136,5 +136,5 @@ def upload_imagem(user_id):
 
     # Retorna a URl acessível, se o upload for bem sucedido
     if status == 200:
-        resultado['imagem_url'] = f'/api/uploads/{os.path.basename(resultado['imagem_url'])}'
+        resultado['imagem_url'] = f"/api/uploads/{os.path.basename(resultado['imagem_url'])}"
     return jsonify(resultado), status
