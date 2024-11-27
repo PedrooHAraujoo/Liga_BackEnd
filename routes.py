@@ -69,17 +69,10 @@ def login():
     return jsonify(reposta), status
 
 # Rota para o perfil do usuario
-from flask import jsonify
-
-from models import Usuario  # Certifique-se de que o modelo está importado
-
 @app_routes.route('/perfil', methods=['GET'])
 @jwt_required
-def visualizar_perfil():
+def visualizar_perfil(user_id):
     try:
-        # Obtém o ID do usuário do token JWT
-        user_id = get_jwt_identity()
-        
         # Busca o usuário no banco de dados
         usuario = Usuario.query.get(user_id)
 
