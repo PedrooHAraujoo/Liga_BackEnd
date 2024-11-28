@@ -12,21 +12,13 @@ class Equipe(db.Model):
     rankings = db.relationship('Ranking', back_populates='equipe', lazy=True)
     pontuacoes = db.relationship('Pontuacao', back_populates='equipe', lazy=True)
     usuarios = db.relationship('Usuario', back_populates='equipe', lazy=True)
-    
+
     def to_dict(self):
         return {
             'id': self.id,
             'nome': self.nome,
             'tipo': self.tipo
         }
-
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "nome": self.nome,
-            "tipo": self.tipo
-        }
-
 
 class Ranking(db.Model):
     __tablename__ = 'rankings'
@@ -35,7 +27,6 @@ class Ranking(db.Model):
     tipo_ranking = db.Column(db.String, nullable=False)
     pontuacao_total = db.Column(db.Integer, nullable=False)
 
-    # Relacionamento com Equipe
     equipe = db.relationship('Equipe', back_populates='rankings')
 
     def to_dict(self):
@@ -47,7 +38,6 @@ class Ranking(db.Model):
             "equipe": self.equipe.to_dict() if self.equipe else None
         }
 
-
 class Pontuacao(db.Model):
     __tablename__ = 'pontuacoes'
     id = db.Column(db.Integer, primary_key=True)
@@ -56,7 +46,6 @@ class Pontuacao(db.Model):
     equipe_id = db.Column(db.Integer, db.ForeignKey('equipes.id'), nullable=False)
     data = db.Column(db.Date, nullable=False)
 
-    # Relacionamento com Equipe
     equipe = db.relationship('Equipe', back_populates='pontuacoes')
 
     def to_dict(self):
@@ -69,18 +58,15 @@ class Pontuacao(db.Model):
             "equipe": self.equipe.to_dict() if self.equipe else None
         }
 
-
 class Cargo(db.Model):
     __tablename__ = 'cargos'
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(50), unique=True, nullable=False)
     descricao = db.Column(db.String(255))
 
-    # Relacionamento com Usuario e Permissoes
     usuarios = db.relationship('Usuario', backref='cargo', lazy=True)
     permissoes = db.relationship('CargoPermissao', back_populates='cargo', lazy=True)
-    
-    # Adicionei um método para Serialização para cada Classe.  
+
     def to_dict(self):
         return {
             'id': self.id,
@@ -88,21 +74,12 @@ class Cargo(db.Model):
             'descricao': self.descricao
         }
 
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "nome": self.nome,
-            "descricao": self.descricao
-        }
-
-
 class Permissao(db.Model):
     __tablename__ = 'permissoes'
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(50), unique=True, nullable=False)
     descricao = db.Column(db.String(255), nullable=True)
 
-    # Relacionamento com CargoPermissao
     cargos = db.relationship('CargoPermissao', back_populates='permissao', lazy=True)
 
     def to_dict(self):
@@ -112,14 +89,12 @@ class Permissao(db.Model):
             "descricao": self.descricao
         }
 
-
 class CargoPermissao(db.Model):
     __tablename__ = 'cargo_permissao'
     id = db.Column(db.Integer, primary_key=True)
     cargo_id = db.Column(db.Integer, db.ForeignKey('cargos.id'), nullable=False)
     permissao_id = db.Column(db.Integer, db.ForeignKey('permissoes.id'), nullable=False)
 
-    # Relacionamento com Cargo e Permissao
     cargo = db.relationship('Cargo', back_populates='permissoes')
     permissao = db.relationship('Permissao', back_populates='cargos')
 
@@ -132,7 +107,6 @@ class CargoPermissao(db.Model):
             "permissao": self.permissao.to_dict() if self.permissao else None
         }
 
-
 class Usuario(db.Model):
     __tablename__ = 'usuarios'
     id = db.Column(db.Integer, primary_key=True)
@@ -144,7 +118,6 @@ class Usuario(db.Model):
     equipe_id = db.Column(db.Integer, db.ForeignKey('equipes.id'), nullable=False)
     instagram = db.Column(db.String, nullable=False)
 
-    # Relacionamento com Cargo e Equipe
     equipe = db.relationship('Equipe', back_populates='usuarios')
 
     def to_dict(self):
