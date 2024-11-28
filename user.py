@@ -4,6 +4,7 @@ import datetime
 from flask import current_app
 from models import db, Usuario, Cargo, Equipe
 from werkzeug.utils import secure_filename
+from flask import jsonify
 import os
 
 def adicionar_usuario(nome, email, senha, cargo, equipe, instagram):
@@ -81,20 +82,31 @@ def login_usuario(email, senha):
 
 def gerar_token(user_id):
     payload ={
-        'sub': user_id,
+        'sub': str(user_id),
         'iat': datetime.datetime.utcnow(), # Registra o hor[ario em que o token foi gerado
         'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1) # Token expira em 1 hora
     }
-    return jwt.encode(payload, os.getenv('SECRET_KEY'), algorithm='HS256')
+    token = jwt.encode(payload, os.getenv('SECRET_KEY'),'HS256')
+    return token
 
 def verificar_token(token):
     try:
-        payload = jwt.decode(token, os.getenv('SECRET_KEY'), algorithms=['HS256'])
-        return payload['sub'] # Retorna o id do usuário
+        print(f"Token completo: {token}")
+        decoded = jwt.decode(
+            token, 
+            os.getenv('SECRET_KEY'), 
+            algorithms=['HS256'],
+        )
+        
+        return int(decoded.get('sub')) # Retorna o id do usuário
+    
     except jwt.ExpiredSignatureError:
+        print("Token expirado") 
         return None
-    except jwt.InvalidTokenError:
+    except jwt.InvalidTokenError as e:
+        print(f"Erro de token: {type(e)} - {e}")
         return None
+
 
 def obter_usuario(user_id):
     try:
@@ -104,16 +116,13 @@ def obter_usuario(user_id):
         if not usuario:
             return {'error': 'Usuário não encontrado', 'status': 'fail'}, 404
         
+        # passa os dados_usuario para o método to_dict()
+        dados_usuario = usuario.to_dict()
+        dados_usuario['status'] = 'success'
+        
         # Retorna os dados do usuário em formato JSON
-        return {
-            'id': usuario.id,
-            'nome': usuario.nome,
-            'email': usuario.email,
-            'cargo': usuario.cargo,
-            'equipe': usuario.equipe,
-            'instagram': usuario.instagram,
-            'status': 'sucess'
-        }, 200
+        return dados_usuario, 200
+    
     except Exception as e:
         return {'error': f'Ocorreu um erro no banco de dados: {str(e)}', 'status': 'fail'}, 500
     
@@ -127,14 +136,42 @@ def atualizar_usuario(user_id, nome, email, instagram):
         usuario.instagram = instagram if instagram else usuario.instagram
         db.session.commit()
         
-        return{'message': 'Perfil atualizado com sucesso!'}, 200
+        # Retorna os dados atualizados passando pelo metodo to_dict()
+        dados_usuario = usuario.to_dict()
+        dados_usuario['message'] = 'Perfil atualizado com sucesso!'
+        dados_usuario['status'] = 'success'
+        
+        return dados_usuario, 200
+        
     except Exception as e:
-        return {'error': f'Ocorreu um erro ao atualizar o perfil: {str(e)}'}, 500
-    
+        db.session.rollback()
+        return {'error': f'Ocorreu um erro ao atualizar o perfil: {str(e)}', 'status': 'fail'}, 500
+
+def validar_extensao(arquivo):
+    # Extensões permitidas
+    extensoes_permitidas = ['png', 'jpg', 'jpeg']
+    # Extrai a extensão do arquivo
+    extensao = arquivo.rsplit('.', 1)[-1].lower()
+    # Verifica se a extensão está na lista de permitidas
+    return extensao in extensoes_permitidas
+
 def salvar_imagem_perfil(user_id, imagem, upload_folder):
     try:
-        # Define um nome seguro para o arquivo, incluindo o ID do usuário
+        
+        # Valida a extensão do arquivo
+        if not validar_extensao(imagem.filename):
+            return jsonify({
+                'status': 'error',
+                'message': 'A extensão do arquivo fornecido é inválido',
+                'details': 'Apenas arquivos com as extensões .png, . .jpg, .jpeg são permitidos'
+            }), 400
+        # Para uso de debug (para ver o valor de upload_folder)
+        print(f"UPLOAD_FOLDER: {upload_folder}")
+        # Certifica-se de que o diretório de upload existe
+        if not os.path.exists(upload_folder):
+            os.makedirs(upload_folder)
 
+        # Define um nome seguro para o arquivo, incluindo o ID do usuário
         filename = secure_filename(f'{user_id}_{imagem.filename}')
         filepath = os.path.join(upload_folder, filename)
 
@@ -143,9 +180,15 @@ def salvar_imagem_perfil(user_id, imagem, upload_folder):
     
         # Salvar caminho no banco de dados
         usuario = Usuario.query.get(user_id)
+        if not usuario:
+            return jsonify({
+                'status': 'error',
+                'message': 'Usuário não encontrado'
+            }), 404
         usuario.imagem_perfil = filepath
         db.session.commit()
 
         return {'message': 'Imagem enviada com sucesso!', 'imagem_url': filepath}, 200
     except Exception as e:
         return {'error': f'Error ao salvar a imagem: {str(e)}'}, 500
+    
