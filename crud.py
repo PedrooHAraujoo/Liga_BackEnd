@@ -193,7 +193,7 @@ def atualizar_usuario(id, nome=None, email=None, senha=None, cargo_id=None, equi
         db.session.commit()
     return usuario
 
-def deletar_usuario(id):
+def deletar_usuario_crud(id):
     usuario = Usuario.query.get(id)
     if usuario:
         db.session.delete(usuario)

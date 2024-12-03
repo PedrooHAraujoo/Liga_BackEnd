@@ -8,8 +8,7 @@ class Equipe(db.Model):
     nome = db.Column(db.String, nullable=False)
     tipo = db.Column(db.String, nullable=False)
 
-    # Relacionamento com Ranking, Pontuacao e Usuario
-    rankings = db.relationship('Ranking', back_populates='equipe', lazy=True)
+    # Relacionamento com Pontuacao e Usuario
     pontuacoes = db.relationship('Pontuacao', back_populates='equipe', lazy=True)
     usuarios = db.relationship('Usuario', back_populates='equipe', lazy=True)
 
@@ -23,20 +22,18 @@ class Equipe(db.Model):
 class Ranking(db.Model):
     __tablename__ = 'rankings'
     id = db.Column(db.Integer, primary_key=True)
-    equipe_id = db.Column(db.Integer, db.ForeignKey('equipes.id'), nullable=False)
-    tipo_ranking = db.Column(db.String, nullable=False)
-    pontuacao_total = db.Column(db.Integer, nullable=False)
-
-    equipe = db.relationship('Equipe', back_populates='rankings')
+    nome_ranking = db.Column(db.String, nullable=False, default="Nenhum")  # Nome do ranking
+    tipo = db.Column(db.String, nullable=True)  # Categoria ou tipo do ranking
+    meta_pontuacao = db.Column(db.Integer, nullable=False, default=0)  # Meta para atingir este ranking
 
     def to_dict(self):
         return {
             "id": self.id,
-            "equipe_id": self.equipe_id,
-            "tipo_ranking": self.tipo_ranking,
-            "pontuacao_total": self.pontuacao_total,
-            "equipe": self.equipe.to_dict() if self.equipe else None
+            "nome_ranking": self.nome_ranking,
+            "tipo": self.tipo,
+            "meta_pontuacao": self.meta_pontuacao
         }
+
 
 class Pontuacao(db.Model):
     __tablename__ = 'pontuacoes'
@@ -113,20 +110,24 @@ class Usuario(db.Model):
     nome = db.Column(db.String, nullable=False)
     email = db.Column(db.String, nullable=False, unique=True)
     senha = db.Column(db.String, nullable=False)
+    cargo_id = db.Column(db.Integer, db.ForeignKey('cargos.id'))
+    equipe_id = db.Column(db.Integer, db.ForeignKey('equipes.id'))
+    instagram = db.Column(db.String)
     status = db.Column(db.String, default='pendente', nullable=False)
-    cargo_id = db.Column(db.Integer, db.ForeignKey('cargos.id'), nullable=False)
-    equipe_id = db.Column(db.Integer, db.ForeignKey('equipes.id'), nullable=False)
-    instagram = db.Column(db.String, nullable=False)
+    pontuacao_total = db.Column(db.Integer, default=0, nullable=False)  # Pontuação acumulada do usuário
+    ranking_atual_id = db.Column(db.Integer, db.ForeignKey('rankings.id'), nullable=True)  # Ranking atual
 
-    equipe = db.relationship('Equipe', back_populates='usuarios')
+    ranking_atual = db.relationship('Ranking')  # Relacionamento com o ranking atual
 
     def to_dict(self):
         return {
             "id": self.id,
             "nome": self.nome,
             "email": self.email,
+            "cargo_id": self.cargo_id,
+            "equipe_id": self.equipe_id,
+            "instagram": self.instagram,
             "status": self.status,
-            "cargo": self.cargo.to_dict() if self.cargo else None,
-            "equipe": self.equipe.to_dict() if self.equipe else None,
-            "instagram": self.instagram
+            "pontuacao_total": self.pontuacao_total,
+            "ranking_atual": self.ranking_atual.to_dict() if self.ranking_atual else None
         }

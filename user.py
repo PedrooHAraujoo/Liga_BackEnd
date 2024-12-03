@@ -2,44 +2,64 @@ import bcrypt
 import jwt
 import datetime
 from flask import current_app
-from models import db, Usuario, Cargo, Equipe
+from models import db, Usuario, Cargo, Equipe, Ranking
 from werkzeug.utils import secure_filename
 from flask import jsonify
 import os
 
 def adicionar_usuario(nome, email, senha, cargo, equipe, instagram):
-    senha_hashed = bcrypt.hashpw(senha.encode('utf-8'), bcrypt.gensalt())
+    # Hash da senha com bcrypt
+    senha_hashed = bcrypt.hashpw(senha.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
     try:
-       # Verifica se o email já existe
+        # Verifica se o email já existe
         usuario_existente = Usuario.query.filter_by(email=email).first()
         if usuario_existente:
             return {'error': 'O email já foi registrado.', 'status': 'fail'}, 400
-       
-        # Verifica se o cargo e equipe são válidos
+
+        # Verifica se o cargo e a equipe são válidos
         cargo_existente = Cargo.query.filter_by(nome=cargo).first()
         equipe_existente = Equipe.query.filter_by(nome=equipe).first()
         if not cargo_existente or not equipe_existente:
-         return {'error': f'Cargo ou equipe inválidos: {cargo}, {equipe}', 'status': 'fail'}, 400
+            return {
+                'error': f'Cargo ou equipe inválidos: Cargo={cargo}, Equipe={equipe}',
+                'status': 'fail'
+            }, 400
 
-       
-       # Se o email não existe cria um novo usuário
+        # Cria o novo usuário
         novo_usuario = Usuario(
             nome=nome,
             email=email,
             senha=senha_hashed,
-            cargo=cargo_existente, # Associa a instância de Cargo
-            equipe=equipe_existente, # Associa a instância de Equipe
+            cargo=cargo_existente,  # Associa a instância de Cargo
+            equipe=equipe_existente,  # Associa a instância de Equipe
             instagram=instagram
         )
-        
-        db.session.add(novo_usuario) # Adiciona à sessão
-        db.session.commit() # Confirma a transação
-        return {'message': f'Usuário {nome} foi adicionado com sucesso!', 'status': 'success'}, 201
-    
+
+        # Adiciona o ranking inicial "Nenhum" ao novo usuário
+        ranking_inicial = Ranking(
+            usuario=novo_usuario,
+            nome_ranking="Nenhum",  # Ranking inicial
+            meta_pontuacao=0,  # Sem meta inicial
+            pontuacao_total=0  # Pontuação inicial
+        )
+
+        # Adiciona à sessão e confirma a transação
+        db.session.add(novo_usuario)
+        db.session.add(ranking_inicial)
+        db.session.commit()
+
+        return {
+            'message': f'Usuário {nome} foi adicionado com sucesso!',
+            'status': 'success'
+        }, 201
+
     except Exception as e:
-        db.session.rollback() # Reverte a transação se houver erro
-        return {'error': f'Ocorreu um erro no banco de dados: {str(e)}', 'status': 'fail'}, 500
+        db.session.rollback()  # Reverte a transação em caso de erro
+        return {
+            'error': f'Ocorreu um erro no banco de dados: {str(e)}',
+            'status': 'fail'
+        }, 500
     
 def redefinir_senha(email, nova_senha):
 
