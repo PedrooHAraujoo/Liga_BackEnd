@@ -1,11 +1,11 @@
 
-# APP LIGA COHAB
+# APP LIGA MAXIMUS
 
-Este é um esboço preliminar do README para o projeto "APP LIGA COHAB", que está atualmente nas fases iniciais de desenvolvimento.
+Este é um esboço preliminar do README para o projeto "APP LIGA MAXIMUS", que está atualmente nas fases iniciais de desenvolvimento.
 
 ## Visão Geral
 
-"APP LIGA COHAB" é um aplicativo projetado para gerenciar e acompanhar informações de ligas de premiação coorporativa, com foco em fornecer atualizações de rankings em tempo real e outras métricas relevantes. O projeto ainda está na fase conceitual, e o objetivo principal é criar uma interface amigável que permita o registro de equipes, consulta de rankings e acompanhamento de pontuações.
+"APP LIGA MAXIMUS" é um aplicativo projetado para gerenciar e acompanhar informações de ligas de premiação corporativa, com foco em fornecer atualizações de rankings em tempo real e outras métricas relevantes. O projeto ainda está na fase conceitual, e o objetivo principal é criar uma interface amigável que permita o registro de equipes, consulta de rankings e acompanhamento de pontuações.
 
 ## Funcionalidades (Planejadas)
 
@@ -52,13 +52,13 @@ Além disso, será necessário um banco de dados SQLite ou outro banco de dados 
 Clone este repositório para sua máquina local:
 
 ```bash
-git clone https://github.com/seu_usuario/app-liga-cohab.git
+git clone https://github.com/PedrooHAraujoo/Liga_Backend.git
 ```
 ### Passo 2: Configurar o Ambiente Virtual
 
 Crie um ambiente virtual para instalar as dependências do projeto:
 ```bash
-cd app-liga-cohab
+cd Liga_Backend
 python -m venv venv
 ```
 Ative o ambiente virtual:
@@ -73,7 +73,7 @@ source venv/bin/activate
 ```
 ### Passo 3: Instalar as Dependências
 
-instale as dependências necessárias, listadas no arquivo requirements.txt:
+Instale as dependências necessárias, listadas no arquivo requirements.txt:
 ```bash
 pip install -r requirements.txt
 ```
@@ -85,7 +85,7 @@ SECRET_KEY=seu_segredo_aqui
 UPLOAD_FOLDER=seu_caminho_de_upload_aqui
 DATABASE_URL=sqlite:///path_to_your_database.db
 ```
-- SECRET_KEY: A chave secreta usada para gerar  tokens JWT
+- SECRET_KEY: A chave secreta usada para gerar tokens JWT
 - UPLOAD_FOLDER: O diretório onde as imagens de perfil serão salvas
 - DATABASE_URL: A URL de conexão com o banco de dados. Se estiver usando SQLite, pode ser algo como sqlite:///app.db. Caso use outro banco de dados, como PostgreSQL ou MySQL, a URL seria algo como:
   - PostgreSQL: postgresql://usuario:senha@localhost:5432/nome_do_banco
@@ -105,7 +105,7 @@ Se preferir criar o banco manualmente ou utilizar outro banco de dados, basta co
 Caso precise inicializar o banco de dados antes de rodar o servidor pela primeira vez, você pode usar o seguinte comando no Python:
 ```bash
 from app import db
-db.crate_all()
+db.create_all()
 ```
 ## Passo 6: Executar o Projeto:
 
@@ -113,7 +113,7 @@ Para iniciar o servidor Flask, execute o seguinte comando:
 ```bash
 python app.py
 ```
-O sevidor será iniciado na 5000 por padrão. Você pode acessar a aplicação através de:
+O servidor será iniciado na porta 5000 por padrão. Você pode acessar a aplicação através de:
 ```bash
 http://127.0.0.1:5000
 ```
@@ -122,4 +122,8 @@ As instruções para configurar o projeto localmente serão fornecidas conforme 
 
 ## Status do Projeto
 
-Este projeto ainda está nas fase desenvolvimento. Algumas funcionalidades e tecnologias podem mudar à medida que o projeto evolui.
+Este projeto ainda está na fase de desenvolvimento. Algumas funcionalidades e tecnologias podem mudar à medida que o projeto evolui.
+
+---
+
+Caso precise de mais atualizações ou modificações, estou à disposição!
