@@ -8,10 +8,6 @@ class Equipe(db.Model):
     nome = db.Column(db.String, nullable=False)
     tipo = db.Column(db.String, nullable=False)
 
-    # Relacionamento com Pontuacao e Usuario
-    pontuacoes = db.relationship('Pontuacao', back_populates='equipe', lazy=True)
-    usuarios = db.relationship('Usuario', back_populates='equipe', lazy=True)
-
     def to_dict(self):
         return {
             'id': self.id,
@@ -40,19 +36,19 @@ class Pontuacao(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     tipo = db.Column(db.String, nullable=False)
     valor = db.Column(db.Integer, nullable=False)
-    equipe_id = db.Column(db.Integer, db.ForeignKey('equipes.id'), nullable=False)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False) # Vinculação com usuários
     data = db.Column(db.Date, nullable=False)
 
-    equipe = db.relationship('Equipe', back_populates='pontuacoes')
+    usuario = db.relationship('Usuario', back_populates='pontuacoes') # Relacionamento com usuários
 
     def to_dict(self):
         return {
             "id": self.id,
             "tipo": self.tipo,
             "valor": self.valor,
-            "equipe_id": self.equipe_id,
+            "usuario_id": self.usuario_id,
             "data": self.data.isoformat(),
-            "equipe": self.equipe.to_dict() if self.equipe else None
+            "usuario": self.usuario.to_dict() if self.usuario else None
         }
 
 class Cargo(db.Model):
@@ -111,14 +107,15 @@ class Usuario(db.Model):
     email = db.Column(db.String, nullable=False, unique=True)
     senha = db.Column(db.String, nullable=False)
     cargo_id = db.Column(db.Integer, db.ForeignKey('cargos.id'))
-    equipe_id = db.Column(db.Integer, db.ForeignKey('equipes.id'))
+    equipe_id = db.Column(db.Integer, db.ForeignKey('equipes.id'), nullable=True) # Vinculação opcional para Admin ou Suporte
     instagram = db.Column(db.String)
     status = db.Column(db.String, default='pendente', nullable=False)
     pontuacao_total = db.Column(db.Integer, default=0, nullable=False)  # Pontuação acumulada do usuário
     ranking_atual_id = db.Column(db.Integer, db.ForeignKey('rankings.id'), nullable=True)  # Ranking atual
 
     ranking_atual = db.relationship('Ranking')  # Relacionamento com o ranking atual
-
+    pontuacoes = db.relationship('Pontuacao', back_populates='usuario', lazy=True) # Relacionamento com as pontuações
+    
     def to_dict(self):
         return {
             "id": self.id,

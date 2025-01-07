@@ -185,4 +185,3 @@ def deletar_usuario(id):
 #@painel_bp.route('/pontuacao', methods=['POST'])
 #@verificar_permissao('gerenciar_pontuacoes')  # Apenas os usuários com a permissão 'gerenciar_pontuacoes' pode acessar
 #def criar_pontuacao():
-    

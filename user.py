@@ -19,10 +19,9 @@ def adicionar_usuario(nome, email, senha, cargo, equipe, instagram):
 
         # Verifica se o cargo e a equipe são válidos
         cargo_existente = Cargo.query.filter_by(nome=cargo).first()
-        equipe_existente = Equipe.query.filter_by(nome=equipe).first()
-        if not cargo_existente or not equipe_existente:
+        if not cargo_existente:
             return {
-                'error': f'Cargo ou equipe inválidos: Cargo={cargo}, Equipe={equipe}',
+                'error': f'Cargo inválido: Cargo={cargo}',
                 'status': 'fail'
             }, 400
 
@@ -32,9 +31,18 @@ def adicionar_usuario(nome, email, senha, cargo, equipe, instagram):
             email=email,
             senha=senha_hashed,
             cargo=cargo_existente,  # Associa a instância de Cargo
-            equipe=equipe_existente,  # Associa a instância de Equipe
             instagram=instagram
         )
+
+        # Associa a equipe, exceto se for Admin ou Suporte
+        if cargo.lower() not in ['admin', 'suporte']:
+            equipe_existente = Equipe.query.filter_by(nome=equipe).first()
+            if not equipe_existente:
+                return {
+                    'error': f'Equipe inválida: Equipe={equipe}',
+                    'status': 'fail'
+                }, 400
+            novo_usuario.equipe = equipe_existente
 
         # Adiciona o ranking inicial "Nenhum" ao novo usuário
         ranking_inicial = Ranking(

@@ -30,8 +30,8 @@ def deletar_equipe(id):
     return False
 
 # Funções Crud para Ranking
-def criar_ranking(equipe_id, tipo_ranking, pontuacao_total):
-    ranking = Ranking(equipe_id=equipe_id, tipo_ranking=tipo_ranking, pontuacao_total=pontuacao_total)
+def criar_ranking(nome_ranking, meta_pontuacao):
+    ranking = Ranking(nome_ranking=nome_ranking, meta_pontuacao=meta_pontuacao)
     db.session.add(ranking)
     db.session.commit()
     
@@ -40,15 +40,13 @@ def criar_ranking(equipe_id, tipo_ranking, pontuacao_total):
 def listar_ranking():
     return Ranking.query.all()
 
-def atualizar_ranking(id, equipe_id=None, tipo_ranking=None, pontuacao_total=None):
+def atualizar_ranking(id, nome_ranking=None, meta_pontuacao=None):
     ranking = Ranking.query.get(id)
     if ranking:
-        if equipe_id:
-            ranking.equipe_id = equipe_id
-        if tipo_ranking:
-            ranking.tipo_ranking = tipo_ranking
-        if pontuacao_total:
-            ranking.pontuacao_total = pontuacao_total
+        if nome_ranking:
+            ranking.nome_ranking = nome_ranking
+        if meta_pontuacao:
+            ranking.meta_pontuacap = meta_pontuacao
         db.session.commit()
     return ranking
 
@@ -61,8 +59,8 @@ def deletar_ranking(id):
     return False
 
 # Funções Crud para Pontuação
-def criar_pontuacao(tipo, valor, equipe_id, data):
-    pontuacao = Pontuacao(tipo=tipo, valor=valor, equipe_id=equipe_id, data=data)
+def criar_pontuacao(tipo, valor, usuario_id, data):
+    pontuacao = Pontuacao(tipo=tipo, valor=valor, usuario_id=usuario_id, data=data)
     db.session.add(pontuacao)
     db.session.commit()
     return pontuacao
@@ -70,15 +68,15 @@ def criar_pontuacao(tipo, valor, equipe_id, data):
 def listar_pontuacao():
     return Pontuacao.query.all()
 
-def atualizar_pontuacao(id, tipo=None, valor=None, equipe_id=None, data=None):
+def atualizar_pontuacao(id, tipo=None, valor=None, usuario_id=None, data=None):
     pontuacao = Pontuacao.query.get(id)
     if pontuacao:
         if tipo:
             pontuacao.tipo = tipo
         if valor:
             pontuacao.valor = valor
-        if equipe_id:
-            pontuacao.equipe_id = equipe_id
+        if usuario_id:
+            pontuacao.usuario_id = usuario_id
         if data:
             pontuacao.data = data
         db.session.commit()
@@ -165,9 +163,15 @@ def desassociar_permissao_cargo(cargo_id, permissao_id):
         return True
     return False
 
-# Funções CRUD para Usuário
-def criar_usuario(nome, email, senha, cargo_id, equipe_id, instagram):
-    usuario = Usuario(nome=nome, email=email, senha=senha, cargo_id=cargo_id, equipe_id=equipe_id, instagram=instagram)
+# Funções CRUD para Usuário (Admin)
+def criar_usuario(nome, email, senha, cargo_id, equipe_id, instagram, ranking=None, pontuacao=None):
+    usuario = Usuario(nome=nome, email=email, senha=senha, cargo_id=cargo_id, instagram=instagram, ranking=ranking, pontuacao=pontuacao)
+    
+    # Associa a equipe, exceto se for Admin ou Suporte
+    cargo_nome= Cargo.query.get(cargo_id).nome.lower()
+    if cargo_nome not in ['admin', 'suporte'] and equipe_id:
+        usuario.equipe_id = equipe_id
+
     db.session.add(usuario)
     db.session.commit()
     return usuario
@@ -175,7 +179,7 @@ def criar_usuario(nome, email, senha, cargo_id, equipe_id, instagram):
 def listar_usuarios():
     return Usuario.query.all()
 
-def atualizar_usuario(id, nome=None, email=None, senha=None, cargo_id=None, equipe_id=None, instagram=None):
+def atualizar_usuario(id, nome=None, email=None, senha=None, cargo_id=None, equipe_id=None, instagram=None, ranking=None, pontuacao=None):
     usuario = Usuario.query.get(id)
     if usuario:
         if nome:
@@ -187,9 +191,15 @@ def atualizar_usuario(id, nome=None, email=None, senha=None, cargo_id=None, equi
         if cargo_id:
             usuario.cargo_id = cargo_id
         if equipe_id:
-            usuario.equipe_id = equipe_id
+            cargo_nome = Cargo.query.get(cargo_id).nome.lower()
+            if cargo_nome not in ['admin', 'suporte']:
+                usuario.equipe_id = equipe_id
         if instagram:
             usuario.instagram = instagram
+        if ranking is not None:
+            usuario.ranking = ranking
+        if pontuacao is not None:
+            usuario.pontuacao = pontuacao
         db.session.commit()
     return usuario
 
