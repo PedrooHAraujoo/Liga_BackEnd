@@ -8,67 +8,75 @@ from flask import jsonify
 import os
 
 def adicionar_usuario(nome, email, senha, cargo, equipe, instagram):
-    # Hash da senha com bcrypt
     senha_hashed = bcrypt.hashpw(senha.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
     try:
-        # Verifica se o email já existe
         usuario_existente = Usuario.query.filter_by(email=email).first()
         if usuario_existente:
             return {'error': 'O email já foi registrado.', 'status': 'fail'}, 400
 
-        # Verifica se o cargo e a equipe são válidos
         cargo_existente = Cargo.query.filter_by(nome=cargo).first()
         if not cargo_existente:
-            return {
-                'error': f'Cargo inválido: Cargo={cargo}',
-                'status': 'fail'
-            }, 400
+            return {'error': f'Cargo inválido: Cargo={cargo}', 'status': 'fail'}, 400
 
-        # Cria o novo usuário
+        # Cria o novo usuário sem equipe inicialmente
         novo_usuario = Usuario(
             nome=nome,
             email=email,
             senha=senha_hashed,
-            cargo=cargo_existente,  # Associa a instância de Cargo
-            instagram=instagram
+            cargo=cargo_existente,
+            instagram=instagram,
+            status='pendente',
+            pontuacao_total=0
         )
+
+        # Adiciona o novo usuário à sessão
+        db.session.add(novo_usuario)
+        db.session.commit()
+
+        print(f"Usuário {novo_usuario.nome} adicionado com ID: {novo_usuario.id}")
 
         # Associa a equipe, exceto se for Admin ou Suporte
         if cargo.lower() not in ['admin', 'suporte']:
             equipe_existente = Equipe.query.filter_by(nome=equipe).first()
             if not equipe_existente:
-                return {
-                    'error': f'Equipe inválida: Equipe={equipe}',
-                    'status': 'fail'
-                }, 400
+                return {'error': f'Equipe inválida: Equipe={equipe}', 'status': 'fail'}, 400
             novo_usuario.equipe = equipe_existente
+            novo_usuario.equipe_id = equipe_existente.id
+            db.session.commit()  # Atualiza o usuário com a equipe
+            print(f"Usuário {novo_usuario.nome} associado à equipe: {novo_usuario.equipe.nome}")
+
+        # Verifica se a equipe foi associada corretamente (apenas para cargos que não sejam Admin ou Suporte)
+        if cargo.lower() not in ['admin', 'suporte']:
+            usuario_atualizado = Usuario.query.get(novo_usuario.id)
+            if usuario_atualizado.equipe:
+                print(f"Equipe do usuário {usuario_atualizado.nome}: {usuario_atualizado.equipe.nome}")
+            else:
+                print(f"Equipe do usuário {usuario_atualizado.nome} não foi associada corretamente")
 
         # Adiciona o ranking inicial "Nenhum" ao novo usuário
         ranking_inicial = Ranking(
-            usuario=novo_usuario,
-            nome_ranking="Nenhum",  # Ranking inicial
-            meta_pontuacao=0,  # Sem meta inicial
-            pontuacao_total=0  # Pontuação inicial
+            usuario_id=novo_usuario.id,
+            nome_ranking="Nenhum",
+            meta_pontuacao=0
         )
 
-        # Adiciona à sessão e confirma a transação
-        db.session.add(novo_usuario)
         db.session.add(ranking_inicial)
+        novo_usuario.ranking_atual = ranking_inicial
         db.session.commit()
 
-        return {
-            'message': f'Usuário {nome} foi adicionado com sucesso!',
-            'status': 'success'
-        }, 201
+        # Verifica se o ranking foi associado corretamente
+        if novo_usuario.ranking_atual:
+            print(f"Ranking do usuário {novo_usuario.nome}: {novo_usuario.ranking_atual.nome_ranking}")
+        else:
+            print(f"Ranking do usuário {novo_usuario.nome} não foi associado corretamente")
+
+        return {'message': f'Usuário {nome} foi adicionado com sucesso!', 'status': 'success'}, 201
 
     except Exception as e:
-        db.session.rollback()  # Reverte a transação em caso de erro
-        return {
-            'error': f'Ocorreu um erro no banco de dados: {str(e)}',
-            'status': 'fail'
-        }, 500
-    
+        db.session.rollback()
+        return {'error': f'Ocorreu um erro no banco de dados: {str(e)}', 'status': 'fail'}, 500
+
 def redefinir_senha(email, nova_senha):
 
     senha_hashed = bcrypt.hashpw(nova_senha.encode('UTF-8'), bcrypt.gensalt())
@@ -97,16 +105,16 @@ def login_usuario(email, senha):
 
         # Verifica se o usuário foi encontrado
         if not usuario:
-            return{'error': 'Usuário não encontrado', 'status': 'fail'}, 404
-        
-        # Verifica se a senha foi fornecida corresponde à senha armazenada
-        if bcrypt.checkpw(senha.encode('utf-8'), usuario.senha):
+            return {'error': 'Usuário não encontrado', 'status': 'fail'}, 404
+
+        # Verifica se a senha fornecida corresponde à senha armazenada
+        if bcrypt.checkpw(senha.encode('utf-8'), usuario.senha.encode('utf-8')):
             token = gerar_token(usuario.id)
-            return{'token': token, 'status': 'success'}, 200
+            return {'token': token, 'status': 'success'}, 200
         else:
-            return{'error': 'Credencias inválidas', 'status': 'fail'}, 401
+            return {'error': 'Credenciais inválidas', 'status': 'fail'}, 401
     except Exception as e:
-        return{"error": f'Ocorreu um erro no banco de dados: {str(e)}', 'status': 'fail'}, 500
+        return {'error': f'Ocorreu um erro no banco de dados: {str(e)}', 'status': 'fail'}, 500
 
 def gerar_token(user_id):
     payload ={

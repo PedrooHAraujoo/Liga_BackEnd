@@ -38,10 +38,14 @@ def cadastar():
     cargo = data.get('cargo')
     equipe = data.get('equipe')
     instagram = data.get('instagram')
+
+    print(f"Dados recebidos: nome={nome}, email={email}, senha={senha}, cargo={cargo}, equipe={equipe}, instagram={instagram}")
+
     if not nome or not email or not senha or not cargo or not equipe or not instagram:
         return jsonify({'error': 'Preencha todos os campos!'}), 400
     
     resultado, status_code = adicionar_usuario(nome, email, senha, cargo, equipe, instagram)
+    print(f"Resultado da adição: {resultado}")
     return jsonify(resultado), status_code
 
 # Rota para redefinir a senha
