@@ -8,11 +8,6 @@ class Equipe(db.Model):
     nome = db.Column(db.String, nullable=False)
     tipo = db.Column(db.String, nullable=False)
 
-    # Relacionamento com Ranking, Pontuacao e Usuario
-    rankings = db.relationship('Ranking', back_populates='equipe', lazy=True)
-    pontuacoes = db.relationship('Pontuacao', back_populates='equipe', lazy=True)
-    usuarios = db.relationship('Usuario', back_populates='equipe', lazy=True)
-    
     def to_dict(self):
         return {
             'id': self.id,
@@ -20,32 +15,26 @@ class Equipe(db.Model):
             'tipo': self.tipo
         }
 
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "nome": self.nome,
-            "tipo": self.tipo
-        }
-
-
 class Ranking(db.Model):
     __tablename__ = 'rankings'
     id = db.Column(db.Integer, primary_key=True)
-    equipe_id = db.Column(db.Integer, db.ForeignKey('equipes.id'), nullable=False)
-    tipo_ranking = db.Column(db.String, nullable=False)
-    pontuacao_total = db.Column(db.Integer, nullable=False)
+    nome_ranking = db.Column(db.String, nullable=False, default="Nenhum")
+    tipo = db.Column(db.String, nullable=True)
+    meta_pontuacao = db.Column(db.Integer, nullable=False, default=0)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
 
-    # Relacionamento com Equipe
-    equipe = db.relationship('Equipe', back_populates='rankings')
+    usuario = db.relationship('Usuario', foreign_keys=[usuario_id], backref=db.backref('rankings', lazy=True))
 
     def to_dict(self):
         return {
             "id": self.id,
-            "equipe_id": self.equipe_id,
-            "tipo_ranking": self.tipo_ranking,
-            "pontuacao_total": self.pontuacao_total,
-            "equipe": self.equipe.to_dict() if self.equipe else None
+            "nome_ranking": self.nome_ranking,
+            "tipo": self.tipo,
+            "meta_pontuacao": self.meta_pontuacao,
+            "usuario_id": self.usuario_id,
+            "usuario": self.usuario.to_dict() if self.usuario else None
         }
+
 
 
 class Pontuacao(db.Model):
@@ -53,22 +42,20 @@ class Pontuacao(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     tipo = db.Column(db.String, nullable=False)
     valor = db.Column(db.Integer, nullable=False)
-    equipe_id = db.Column(db.Integer, db.ForeignKey('equipes.id'), nullable=False)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False) # Vinculação com usuários
     data = db.Column(db.Date, nullable=False)
 
-    # Relacionamento com Equipe
-    equipe = db.relationship('Equipe', back_populates='pontuacoes')
+    usuario = db.relationship('Usuario', back_populates='pontuacoes') # Relacionamento com usuários
 
     def to_dict(self):
         return {
             "id": self.id,
             "tipo": self.tipo,
             "valor": self.valor,
-            "equipe_id": self.equipe_id,
+            "usuario_id": self.usuario_id,
             "data": self.data.isoformat(),
-            "equipe": self.equipe.to_dict() if self.equipe else None
+            "usuario": self.usuario.to_dict() if self.usuario else None
         }
-
 
 class Cargo(db.Model):
     __tablename__ = 'cargos'
@@ -76,11 +63,9 @@ class Cargo(db.Model):
     nome = db.Column(db.String(50), unique=True, nullable=False)
     descricao = db.Column(db.String(255))
 
-    # Relacionamento com Usuario e Permissoes
     usuarios = db.relationship('Usuario', backref='cargo', lazy=True)
     permissoes = db.relationship('CargoPermissao', back_populates='cargo', lazy=True)
-    
-    # Adicionei um método para Serialização para cada Classe.  
+
     def to_dict(self):
         return {
             'id': self.id,
@@ -88,21 +73,12 @@ class Cargo(db.Model):
             'descricao': self.descricao
         }
 
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "nome": self.nome,
-            "descricao": self.descricao
-        }
-
-
 class Permissao(db.Model):
     __tablename__ = 'permissoes'
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(50), unique=True, nullable=False)
     descricao = db.Column(db.String(255), nullable=True)
 
-    # Relacionamento com CargoPermissao
     cargos = db.relationship('CargoPermissao', back_populates='permissao', lazy=True)
 
     def to_dict(self):
@@ -112,14 +88,12 @@ class Permissao(db.Model):
             "descricao": self.descricao
         }
 
-
 class CargoPermissao(db.Model):
     __tablename__ = 'cargo_permissao'
     id = db.Column(db.Integer, primary_key=True)
     cargo_id = db.Column(db.Integer, db.ForeignKey('cargos.id'), nullable=False)
     permissao_id = db.Column(db.Integer, db.ForeignKey('permissoes.id'), nullable=False)
 
-    # Relacionamento com Cargo e Permissao
     cargo = db.relationship('Cargo', back_populates='permissoes')
     permissao = db.relationship('Permissao', back_populates='cargos')
 
@@ -132,28 +106,31 @@ class CargoPermissao(db.Model):
             "permissao": self.permissao.to_dict() if self.permissao else None
         }
 
-
 class Usuario(db.Model):
     __tablename__ = 'usuarios'
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String, nullable=False)
     email = db.Column(db.String, nullable=False, unique=True)
     senha = db.Column(db.String, nullable=False)
+    cargo_id = db.Column(db.Integer, db.ForeignKey('cargos.id'))
+    equipe_id = db.Column(db.Integer, db.ForeignKey('equipes.id'), nullable=True)
+    instagram = db.Column(db.String)
     status = db.Column(db.String, default='pendente', nullable=False)
-    cargo_id = db.Column(db.Integer, db.ForeignKey('cargos.id'), nullable=False)
-    equipe_id = db.Column(db.Integer, db.ForeignKey('equipes.id'), nullable=False)
-    instagram = db.Column(db.String, nullable=False)
+    pontuacao_total = db.Column(db.Integer, default=0, nullable=False)
+    ranking_atual_id = db.Column(db.Integer, db.ForeignKey('rankings.id'), nullable=True)
 
-    # Relacionamento com Cargo e Equipe
-    equipe = db.relationship('Equipe', back_populates='usuarios')
+    ranking_atual = db.relationship('Ranking', foreign_keys=[ranking_atual_id])
+    pontuacoes = db.relationship('Pontuacao', back_populates='usuario', lazy=True)
 
     def to_dict(self):
         return {
             "id": self.id,
             "nome": self.nome,
             "email": self.email,
+            "cargo_id": self.cargo_id,
+            "equipe_id": self.equipe_id,
+            "instagram": self.instagram,
             "status": self.status,
-            "cargo": self.cargo.to_dict() if self.cargo else None,
-            "equipe": self.equipe.to_dict() if self.equipe else None,
-            "instagram": self.instagram
+            "pontuacao_total": self.pontuacao_total,
+            "ranking_atual": self.ranking_atual.to_dict() if self.ranking_atual else None
         }

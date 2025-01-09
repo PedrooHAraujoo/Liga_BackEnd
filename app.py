@@ -2,6 +2,7 @@ from flask import Flask
 from dotenv import load_dotenv
 import os
 from models import db
+from painel import painel_bp
 from routes import app_routes  # Importando o Blueprint
 
 # Função para criar e configurar o app
@@ -23,6 +24,7 @@ def create_app():
 
     # Registra o Blueprint das rotas
     app.register_blueprint(app_routes, url_prefix='/api')
+    app.register_blueprint(painel_bp, url_prefix='/api/painel')
 
     # Cria as tabelas no banco de dados
     with app.app_context():
