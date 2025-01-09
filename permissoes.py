@@ -4,13 +4,34 @@ from models import Usuario
 from user import verificar_token
 
 # Dicionário de permissões
-permissoes = {
-    'Admin': ['gerenciar_usuarios', 'visualizar_logs', 'acessar_tudo'],
-    'Gerente': ['visualizar_rankings', 'visualizar_historico', 'visualizar_equipes'],
-    'Corretor': ['visualizar_rankings', 'visualizar_pontuacoes'],
-    'Assistente_de_Locacao': ['visualiza_rankings', 'visualizar_pontuacoes'],
-    'suporte': ['visualizar_usuarios']
+permissoes_por_cargo = {
+    'Admin': [
+        'gerenciar_usuarios', 'visualizar_logs', 'acessar_tudo', 
+        'aprovar_usuarios', 'criar_cargo', 'criar_permissao', 
+        'editar_cargo', 'editar_permissao', 'deletar_cargo', 
+        'deletar_permissao', 'criar_equipe', 'editar_equipe', 
+        'deletar_equipe', 'criar_ranking', 'editar_ranking', 
+        'deletar_ranking', 'criar_pontuacao', 'editar_pontuacao', 
+        'deletar_pontuacao'
+    ],
+    'Gerente': [
+        'visualizar_rankings', 'visualizar_historico', 
+        'visualizar_equipes', 'listar_rankings', 
+        'listar_equipes', 'listar_pontuacoes'
+    ],
+    'Corretor': [
+        'visualizar_rankings', 'visualizar_pontuacoes', 
+        'listar_rankings', 'listar_pontuacoes'
+    ],
+    'Assistente_de_Locacao': [
+        'visualizar_rankings', 'visualizar_pontuacoes', 
+        'listar_pontuacoes', 'listar_equipes'
+    ],
+    'Suporte': [
+        'visualizar_usuarios', 'listar_usuarios'
+    ]
 }
+
 def verificar_permissao(permissao_necessaria):
     def decorator(f):
         @wraps(f)
@@ -33,7 +54,7 @@ def verificar_permissao(permissao_necessaria):
                 
                 # Verifica se o cargo do usuário possui a permissão necessária
                 cargo = usuario.cargo
-                permissoes_do_cargo = permissoes.get(cargo, [])
+                permissoes_do_cargo = permissoes_por_cargo.get(cargo, [])
                 if permissao_necessaria not in permissoes_do_cargo:
                     return jsonify({'error': f'Acesso negado! Cargo {cargo} não possui a permissão {permissao_necessaria}.'}), 403
             except Exception as e:
