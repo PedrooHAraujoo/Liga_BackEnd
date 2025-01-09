@@ -1,6 +1,7 @@
+import os
 from flask import Blueprint, request, jsonify, current_app
 from functools import wraps
-from werkzeug.utils import secure_filename
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import Usuario
 from user import (
     adicionar_usuario, login_usuario, redefinir_senha, verificar_token, 
@@ -71,8 +72,29 @@ def login():
 @app_routes.route('/perfil', methods=['GET'])
 @jwt_required
 def visualizar_perfil(user_id):
-    resposta, status = obter_usuario(user_id)
-    return jsonify(resposta), status
+    try:
+        # Busca o usuário no banco de dados
+        usuario = Usuario.query.get(user_id)
+
+        if not usuario:
+            return jsonify({"erro": "Usuário não encontrado"}), 404
+
+        # Retorna o perfil do usuário como JSON
+        return jsonify({
+            "id": usuario.id,
+            "nome": usuario.nome,
+            "email": usuario.email,
+            "status": usuario.status,
+            "equipe": usuario.equipe.nome if usuario.equipe else None,
+            "cargo": usuario.cargo.nome if usuario.cargo else None,
+            "instagram": usuario.instagram
+        }), 200
+
+    except Exception as e:
+        # Loga e retorna o erro
+        print(f"Erro ao acessar perfil: {e}")
+        return jsonify({"erro": "Erro ao acessar perfil"}), 500
+
 
 # Rota para editar o perfil
 @app_routes.route('/perfil/editar', methods=['PUT'])
@@ -90,12 +112,22 @@ def editar_perfil(user_id):
 @jwt_required
 def upload_imagem(user_id):
     if 'imagem' not in request.files:
-        return jsonify({'error': 'Nenhuma imagem foi enviada!'}), 400
+        return jsonify({
+            'status': 'error',
+            'message': 'Nenhuma imagem foi enviada'
+        }), 400
     imagem = request.files['imagem']
     if imagem.filename == '':
-        return jsonify({'error': 'Nome do arquivo inválido!'}), 400
+        return jsonify({
+            'status': 'error',
+            'message': 'Nome do arquivo inválido'
+        }), 400
     
     # Usa a configuração do UPLOAD_FOLDER do app principal
     upload_folder = current_app.config['UPLOAD_FOLDER']
     resultado, status = salvar_imagem_perfil(user_id, imagem, upload_folder)
+
+    # Retorna a URl acessível, se o upload for bem sucedido
+    if status == 200:
+        resultado['imagem_url'] = f"/api/uploads/{os.path.basename(resultado['imagem_url'])}"
     return jsonify(resultado), status

@@ -1,4 +1,3 @@
-
 # APP LIGA COHAB
 
 Este é um esboço preliminar do README para o projeto "APP LIGA COHAB", que está atualmente nas fases iniciais de desenvolvimento.

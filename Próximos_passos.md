@@ -1,12 +1,13 @@
 ## Funcionalidades
 
 ### Autenticação
-- **Token JWT (JSON Web Token)**: Implementa autenticação usando JWT para gerenciar sessões de forma mais segura.
-- **Proteção de Rotas**: Adiciona decoradores para proteger rotas que exigem autenticação, permitindo acesso apenas a usuários logados.
+- **Token JWT (JSON Web Token)**: Implementa autenticação usando JWT para gerenciar sessões de forma mais segura. 
+- **Proteção de Rotas**: Adiciona decoradores para proteger rotas que exigem autenticação, permitindo acesso apenas a usuários logados. ###Feito
 
 ### Gerenciamento de Perfis
 - **Visualização e Edição de Perfil**: Permite a visualização e edição de informações de perfil, como nome, email e Instagram.
 - **Upload de Imagem de Perfil**: Adiciona funcionalidade para carregar fotos de perfil.
+- **Rota para Servir Arquivos de Upload**: Adiciona a funcionalidade de que os usuários acessem as imagens carregadas.
 
 ### Controle de Acesso por Cargos
 - **Definição de Cargos e Permissões**: Estrutura de cargos (Admin, Gerente, Corretor, Suporte) com permissões específicas para controlar o que cada usuário pode acessar.
