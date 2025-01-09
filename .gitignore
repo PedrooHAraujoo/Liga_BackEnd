@@ -10,5 +10,5 @@ __pycache__/
 *.pyc
 *venv
 *back-end-cohab
-README.md
 pwa.db
+README.md
