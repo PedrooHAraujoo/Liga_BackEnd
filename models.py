@@ -21,7 +21,7 @@ class Ranking(db.Model):
     nome_ranking = db.Column(db.String, nullable=False, default="Nenhum")
     tipo = db.Column(db.String, nullable=True)
     meta_pontuacao = db.Column(db.Integer, nullable=False, default=0)
-    usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=True) # Permite NULL
 
     usuario = db.relationship('Usuario', foreign_keys=[usuario_id], backref=db.backref('rankings', lazy=True))
 

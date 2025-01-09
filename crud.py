@@ -30,8 +30,8 @@ def deletar_equipe(id):
     return False
 
 # Funções Crud para Ranking
-def criar_ranking(nome_ranking, meta_pontuacao):
-    ranking = Ranking(nome_ranking=nome_ranking, meta_pontuacao=meta_pontuacao)
+def criar_ranking(nome_ranking, tipo, meta_pontuacao):
+    ranking = Ranking(nome_ranking=nome_ranking, tipo=tipo ,meta_pontuacao=meta_pontuacao)
     db.session.add(ranking)
     db.session.commit()
     

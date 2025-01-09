@@ -46,23 +46,25 @@ def adicionar_usuario(nome, email, senha, cargo, equipe, instagram):
             db.session.commit()  # Atualiza o usuário com a equipe
             print(f"Usuário {novo_usuario.nome} associado à equipe: {novo_usuario.equipe.nome}")
 
-        # Verifica se a equipe foi associada corretamente (apenas para cargos que não sejam Admin ou Suporte)
-        if cargo.lower() not in ['admin', 'suporte']:
+            # Verifica se a equipe foi associada corretamente
             usuario_atualizado = Usuario.query.get(novo_usuario.id)
             if usuario_atualizado.equipe:
                 print(f"Equipe do usuário {usuario_atualizado.nome}: {usuario_atualizado.equipe.nome}")
             else:
                 print(f"Equipe do usuário {usuario_atualizado.nome} não foi associada corretamente")
 
-        # Adiciona o ranking inicial "Nenhum" ao novo usuário
-        ranking_inicial = Ranking(
-            usuario_id=novo_usuario.id,
-            nome_ranking="Nenhum",
-            meta_pontuacao=0
-        )
+        # Associa o ranking ao novo usuário
+        if cargo.lower() == 'admin' or cargo.lower() == 'suporte':
+            ranking = Ranking.query.filter_by(nome_ranking="Admin e Suporte").first()
+        else:
+            ranking = Ranking.query.filter_by(nome_ranking="Nenhum").first()
 
-        db.session.add(ranking_inicial)
-        novo_usuario.ranking_atual = ranking_inicial
+        if not ranking:
+            return {'error': f'Ranking "{ranking.nome_ranking}" não encontrado.', 'status': 'fail'}, 400
+
+        # Atualiza o ranking existente sem alterar usuario_id
+        novo_usuario.ranking_atual = ranking
+        novo_usuario.ranking_atual_id = ranking.id
         db.session.commit()
 
         # Verifica se o ranking foi associado corretamente

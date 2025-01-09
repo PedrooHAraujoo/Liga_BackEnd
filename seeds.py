@@ -1,5 +1,5 @@
 from app import create_app  # Importa a função para criar o app
-from crud import criar_equipe, criar_cargo
+from crud import criar_equipe, criar_cargo, criar_ranking
 
 # Cria o app
 app = create_app()
@@ -20,3 +20,10 @@ with app.app_context():
     criar_cargo('Corretor', 'Corretor de Imoveis')
     criar_cargo('Assistente de Locação', 'Assistente de Locação')
     criar_cargo('Suporte', 'Suporte')
+
+    # Criar Rankings
+    criar_ranking('Nenhum', 'Inicial', 0)
+    criar_ranking('Pleno', 'Nível 1', 1000)
+    criar_ranking('Executivo', 'Nível 2', 2000)
+    criar_ranking('Premium', 'Nível 3', 3000)
+    criar_ranking('Admin e Suporte', 'Encaixe', 0)
