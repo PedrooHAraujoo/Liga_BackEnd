@@ -2,6 +2,12 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
+# Tabela de associação muitos-para-muitos entre Usuario e Ranking
+usuario_ranking_association = db.Table('usuario_ranking_association',
+    db.Column('usuario_id', db.Integer, db.ForeignKey('usuarios.id'), primary_key=True),
+    db.Column('ranking_id', db.Integer, db.ForeignKey('rankings.id'), primary_key=True)
+)
+
 class Equipe(db.Model):
     __tablename__ = 'equipes'
     id = db.Column(db.Integer, primary_key=True)
@@ -21,9 +27,9 @@ class Ranking(db.Model):
     nome_ranking = db.Column(db.String, nullable=False, default="Nenhum")
     tipo = db.Column(db.String, nullable=True)
     meta_pontuacao = db.Column(db.Integer, nullable=False, default=0)
-    usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=True) # Permite NULL
 
-    usuario = db.relationship('Usuario', foreign_keys=[usuario_id], backref=db.backref('rankings', lazy=True))
+    # Relacionamento muitos-para-muitos com Usuario
+    usuarios = db.relationship('Usuario', secondary=usuario_ranking_association, back_populates='ranking_atual')
 
     def to_dict(self):
         return {
@@ -31,11 +37,8 @@ class Ranking(db.Model):
             "nome_ranking": self.nome_ranking,
             "tipo": self.tipo,
             "meta_pontuacao": self.meta_pontuacao,
-            "usuario_id": self.usuario_id,
-            "usuario": self.usuario.to_dict() if self.usuario else None
+            "usuarios": [usuario.id for usuario in self.usuarios]
         }
-
-
 
 class Pontuacao(db.Model):
     __tablename__ = 'pontuacoes'
@@ -119,7 +122,8 @@ class Usuario(db.Model):
     pontuacao_total = db.Column(db.Integer, default=0, nullable=False)
     ranking_atual_id = db.Column(db.Integer, db.ForeignKey('rankings.id'), nullable=True)
 
-    ranking_atual = db.relationship('Ranking', foreign_keys=[ranking_atual_id]) # Relacionamento com Ranking
+    # Relacionamento muitos-para-muitos com Ranking
+    ranking_atual = db.relationship('Ranking', secondary=usuario_ranking_association, back_populates='usuarios', overlaps="ranking_atual,usuarios") 
     equipe = db.relationship('Equipe', backref=db.backref('membros', lazy=True)) # Relacionamento com Equipe
     pontuacoes = db.relationship('Pontuacao', back_populates='usuario', lazy=True) # Relacionamento com Pontuações
 
@@ -133,6 +137,6 @@ class Usuario(db.Model):
             "instagram": self.instagram,
             "status": self.status,
             "pontuacao_total": self.pontuacao_total,
-            "ranking_atual": self.ranking_atual.to_dict() if self.ranking_atual else None,
+            "ranking_atual": [ranking.to_dict() for ranking in self.ranking_atual] if self.ranking_atual else None, # Lista de rankings
             "equipe": self.equipe.to_dict() if self.equipe else None # Verifica se a equipe é None
         }
