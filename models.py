@@ -119,8 +119,9 @@ class Usuario(db.Model):
     pontuacao_total = db.Column(db.Integer, default=0, nullable=False)
     ranking_atual_id = db.Column(db.Integer, db.ForeignKey('rankings.id'), nullable=True)
 
-    ranking_atual = db.relationship('Ranking', foreign_keys=[ranking_atual_id])
-    pontuacoes = db.relationship('Pontuacao', back_populates='usuario', lazy=True)
+    ranking_atual = db.relationship('Ranking', foreign_keys=[ranking_atual_id]) # Relacionamento com Ranking
+    equipe = db.relationship('Equipe', backref=db.backref('membros', lazy=True)) # Relacionamento com Equipe
+    pontuacoes = db.relationship('Pontuacao', back_populates='usuario', lazy=True) # Relacionamento com Pontuações
 
     def to_dict(self):
         return {
@@ -132,5 +133,6 @@ class Usuario(db.Model):
             "instagram": self.instagram,
             "status": self.status,
             "pontuacao_total": self.pontuacao_total,
-            "ranking_atual": self.ranking_atual.to_dict() if self.ranking_atual else None
+            "ranking_atual": self.ranking_atual.to_dict() if self.ranking_atual else None,
+            "equipe": self.equipe.to_dict() if self.equipe else None # Verifica se a equipe é None
         }

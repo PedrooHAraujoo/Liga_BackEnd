@@ -75,30 +75,30 @@ def login():
 # Rota para o perfil do usuario
 @app_routes.route('/perfil', methods=['GET'])
 @jwt_required
-def visualizar_perfil(user_id):
+def visualizar_perfil():
     try:
+        # Obtém o usuário a partir do Token JWT
+        user_id = get_jwt_identity()
+
         # Busca o usuário no banco de dados
         usuario = Usuario.query.get(user_id)
 
         if not usuario:
-            return jsonify({"erro": "Usuário não encontrado"}), 404
-
-        # Retorna o perfil do usuário como JSON
-        return jsonify({
-            "id": usuario.id,
-            "nome": usuario.nome,
-            "email": usuario.email,
-            "status": usuario.status,
-            "equipe": usuario.equipe.nome if usuario.equipe else None,
-            "cargo": usuario.cargo.nome if usuario.cargo else None,
-            "instagram": usuario.instagram
-        }), 200
-
+            return jsonify({
+                'error': 'Usuario não encontrado',
+                'status': 'fail'
+            }), 404
+        
+        # Retorna o perfil do usuario como JSON
+        return jsonify(usuario.to_dict()), 200
+    
     except Exception as e:
         # Loga e retorna o erro
         print(f"Erro ao acessar perfil: {e}")
-        return jsonify({"erro": "Erro ao acessar perfil"}), 500
-
+        return jsonify({
+            "erro": "Erro ao acessar perfil",
+            "status": "fail"
+        }), 500
 
 # Rota para editar o perfil
 @app_routes.route('/perfil/editar', methods=['PUT'])
