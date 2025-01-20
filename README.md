@@ -1,4 +1,3 @@
-
 # APP LIGA MAXIMUS
 
 Este é um esboço preliminar do README para o projeto "APP LIGA MAXIMUS", que está atualmente nas fases iniciais de desenvolvimento.
@@ -36,7 +35,7 @@ Este é um esboço preliminar do README para o projeto "APP LIGA MAXIMUS", que e
   - **Rankings**: `ID`, `equipe_id`, `Tipo de Ranking`, `Pontuação Total`
   - **Pontuações**: `ID`, `Tipo` (por exemplo, VGV, plantão), `Valor`, `equipe_id`, `Data`
 
-## Como Executar (A ser atualizado)
+## Como Executar
 ### Requisitos
 
 Antes de executar o projeto, você precisará instalar as seguintes dependências:
@@ -54,6 +53,7 @@ Clone este repositório para sua máquina local:
 ```bash
 git clone https://github.com/PedrooHAraujoo/Liga_Backend.git
 ```
+
 ### Passo 2: Configurar o Ambiente Virtual
 
 Crie um ambiente virtual para instalar as dependências do projeto:
@@ -118,7 +118,72 @@ O servidor será iniciado na porta 5000 por padrão. Você pode acessar a aplica
 http://127.0.0.1:5000
 ```
 
-As instruções para configurar o projeto localmente serão fornecidas conforme o desenvolvimento avança.
+## Passo 7: Populando Tabelas de Permissões, Rankings, Equipes e Cargos:
+
+Para criar os rankings, cargos e equipes, execute o script seeds.py:
+```bash
+python seeds.py
+``` 
+Para criar e associar permissões aos cargos, execute o script seeds_permissoes.py:
+```bash
+python seeds_permissoes.py
+```
+## Endpoints
+### Painel Administração:
+- GET /admin - Acessa o painel de administração.
+
+### Gerenciamento de Equipes:
+- POST /equipe - Cria uma nova equipe.
+
+- GET /equipe - Lista todas as equipes.
+
+- PUT /equipe/<int:id> - Atualiza uma equipe existente.
+
+- DELETE /equipe/<int:id> - Deleta uma equipe
+
+### Gerenciamento de Rankings:
+- POST /ranking - Cria um novo ranking.
+
+- GET /ranking - Lista todos os rankings.
+
+- PUT /ranking/<int:id> - Atualiza um ranking existente.
+
+- DELETE /ranking/<int:id> - Deleta um ranking.
+
+### Gerenciamento de Usuários:
+- PUT /usuario/<int:id>/aprovar - Aprova um usuário.
+
+- PUT /usuario/<int:id> - Atualiza os dados de um usuário.
+
+- GET /usuario/nome/<string:nome> - Obtém os dados de um usuário pelo nome.
+
+- DELETE /usuario/<int:id> - Deleta um usuário.
+
+### Gerenciamento de Pontuações:
+- POST /pontuacao - Cria uma nova pontuação.
+
+- GET /pontuacao - Lista todas as pontuações.
+
+- PUT /pontuacao/<int:id> - Atualiza uma pontuação existente.
+
+- DELETE /pontuacao/<int:id> - Deleta uma pontuação.
+
+## Rotas configuradas em routes.py:
+### Cadastro de usuários:
+- POST /cadastrar - Cadastro de novo usuário.
+
+### Redefinição de senha:
+- POST /redefinir_senha - Redefine a senha do usuário.
+
+### Login:
+- POST /login - Realiza login do usuário.
+
+### Perfil do Usuário:
+- GET /perfil - Visualiza o perfil do usuário (JWT necessário).
+
+- PUT /perfil/editar - Edita o perfil do usuário (JWT necessário).
+
+- POST /perfil/upload_imagem - Faz upload da imagem de perfil do usuário (JWT necessário).
 
 ## Status do Projeto
 
@@ -127,3 +192,4 @@ Este projeto ainda está na fase de desenvolvimento. Algumas funcionalidades e t
 ---
 
 Caso precise de mais atualizações ou modificações, estou à disposição!
+
