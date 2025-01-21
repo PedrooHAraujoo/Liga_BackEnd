@@ -1,4 +1,7 @@
 from models import db, Cargo, Permissao, CargoPermissao
+from app import create_app
+
+app = create_app() # Cria a aplicação Flask
 
 def criar_permissoes():
     permissoes = [
@@ -40,7 +43,7 @@ def associar_permissoes():
             'visualizar_rankings', 'visualizar_pontuacoes', 
             'listar_rankings', 'listar_pontuacoes'
         ],
-        'Assistente_de_Locacao': [
+        'Assistente de Locação': [
             'visualizar_rankings', 'visualizar_pontuacoes', 
             'listar_pontuacoes', 'listar_equipes'
         ],
@@ -63,7 +66,8 @@ def associar_permissoes():
     db.session.commit()
 
 if __name__ == '__main__':
-    # Execute as funções para criar permissões e associá-las aos cargos
-    criar_permissoes()
-    associar_permissoes()
-    print('Permissões criadas e assosciadas aos cargos com sucesso!')
+
+    with app.app_context():# Execute as funções para criar permissões e associá-las aos cargos
+        criar_permissoes()
+        associar_permissoes()
+        print('Permissões criadas e assosciadas aos cargos com sucesso!')
