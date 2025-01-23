@@ -1,7 +1,6 @@
 import bcrypt
 import jwt
 import datetime
-from flask import current_app
 from models import db, Usuario, Cargo, Equipe, Ranking
 from werkzeug.utils import secure_filename
 from flask import jsonify
@@ -203,10 +202,12 @@ def salvar_imagem_perfil(user_id, imagem, upload_folder):
             return jsonify({
                 'status': 'error',
                 'message': 'A extensão do arquivo fornecido é inválido',
-                'details': 'Apenas arquivos com as extensões .png, . .jpg, .jpeg são permitidos'
+                'details': 'Apenas arquivos com as extensões .png, .jpg, .jpeg são permitidos'
             }), 400
+        
         # Para uso de debug (para ver o valor de upload_folder)
         print(f"UPLOAD_FOLDER: {upload_folder}")
+
         # Certifica-se de que o diretório de upload existe
         if not os.path.exists(upload_folder):
             os.makedirs(upload_folder)
@@ -215,7 +216,7 @@ def salvar_imagem_perfil(user_id, imagem, upload_folder):
         filename = secure_filename(f'{user_id}_{imagem.filename}')
         filepath = os.path.join(upload_folder, filename)
 
-        # Salva a imagem no caminho especificado(upload_folder/ filename)
+        # Salva a imagem no caminho especificado(upload_folder/filename)
         imagem.save(filepath)
     
         # Salvar caminho no banco de dados
