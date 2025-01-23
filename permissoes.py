@@ -12,7 +12,7 @@ permissoes_por_cargo = {
         'deletar_permissao', 'criar_equipe', 'editar_equipe', 
         'deletar_equipe', 'criar_ranking', 'editar_ranking', 
         'deletar_ranking', 'criar_pontuacao', 'editar_pontuacao', 
-        'deletar_pontuacao'
+        'deletar_pontuacao', 'visualizar_equipes'
     ],
     'Gerente': [
         'visualizar_rankings', 'visualizar_historico', 
@@ -53,10 +53,10 @@ def verificar_permissao(permissao_necessaria):
                     return jsonify({'error': 'Usuário não encontrado!'}), 404
                 
                 # Verifica se o cargo do usuário possui a permissão necessária
-                cargo = usuario.cargo
-                permissoes_do_cargo = permissoes_por_cargo.get(cargo, [])
+                cargo_nome = usuario.cargo.nome
+                permissoes_do_cargo = permissoes_por_cargo.get(cargo_nome, [])
                 if permissao_necessaria not in permissoes_do_cargo:
-                    return jsonify({'error': f'Acesso negado! Cargo {cargo} não possui a permissão {permissao_necessaria}.'}), 403
+                    return jsonify({'error': f'Acesso negado! Cargo {cargo_nome} não possui a permissão {permissao_necessaria}.'}), 403
             except Exception as e:
                 return jsonify({'error': f'Erro na autenticação: {str(e)}'}), 401
             

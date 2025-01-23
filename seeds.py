@@ -27,3 +27,4 @@ with app.app_context():
     criar_ranking('Executivo', 'Nível 2', 2000)
     criar_ranking('Premium', 'Nível 3', 3000)
     criar_ranking('Admin e Suporte', 'Encaixe', 0)
+    criar_ranking('Gerentes','Encaixe', 0)
