@@ -100,7 +100,7 @@ def visualizar_perfil(user_id):
             "status": "fail"
         }), 500
 
-# Rota para editar o perfil
+# Rota para editar o perfil 
 @app_routes.route('/perfil/editar', methods=['PUT'])
 @verificar_jwt
 def editar_perfil(user_id):
