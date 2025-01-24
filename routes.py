@@ -25,7 +25,7 @@ def verificar_jwt(f):
                 return jsonify({'error': 'Token inválido ou expirado'}), 401
         except Exception as e:
             return jsonify({'error': f'Erro na autenticação: {str(e)}'}), 401
-        return f(user_id, *args, **kwargs)
+        return f(user_id, *args, **kwargs, user_id=user_id)
     return decorated_functions
 
 # Rota para cadastro de usuário
@@ -75,7 +75,7 @@ def login():
 # Rota para o perfil do usuario
 @app_routes.route('/perfil', methods=['GET'])
 @verificar_jwt
-def visualizar_perfil():
+def visualizar_perfil(user_id):
     try:
         # Obtém o usuário a partir do Token JWT
         user_id = get_jwt_identity()
