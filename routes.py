@@ -75,7 +75,7 @@ def login():
 # Rota para o perfil do usuario
 @app_routes.route('/perfil', methods=['GET'])
 @verificar_jwt
-def visualizar_perfil(user_id):
+def visualizar_perfil():
     try:
         # Obtém o usuário a partir do Token JWT
         user_id = get_jwt_identity()
