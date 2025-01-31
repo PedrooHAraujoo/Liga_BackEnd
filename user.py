@@ -17,7 +17,7 @@ def adicionar_usuario(nome, email, senha, cargo, equipe, instagram):
         cargo_existente = Cargo.query.filter_by(nome=cargo).first()
         if not cargo_existente:
             return {'error': f'Cargo inválido: Cargo={cargo}', 'status': 'fail'}, 400
-
+        status_usuario = 'aprovado' if cargo.lower() in ['admin', 'suporte'] else 'pendente'
         # Cria o novo usuário sem equipe inicialmente
         novo_usuario = Usuario(
             nome=nome,
@@ -25,7 +25,7 @@ def adicionar_usuario(nome, email, senha, cargo, equipe, instagram):
             senha=senha_hashed,
             cargo=cargo_existente,
             instagram=instagram,
-            status='pendente',
+            status=status_usuario,
             pontuacao_total=0
         )
 
