@@ -122,7 +122,7 @@ def login_usuario(email, senha):
 def gerar_token(user_id):
     payload ={
         'sub': str(user_id),
-        'iat': datetime.datetime.utcnow(), # Registra o hor[ario em que o token foi gerado
+        'iat': datetime.datetime.utcnow(), # Registra o horário em que o token foi gerado
         'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1) # Token expira em 1 hora
     }
     token = jwt.encode(payload, os.getenv('SECRET_KEY'),'HS256')

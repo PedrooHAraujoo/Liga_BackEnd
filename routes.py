@@ -77,9 +77,6 @@ def login():
 @verificar_jwt
 def visualizar_perfil(user_id):
     try:
-        # Obtém o usuário a partir do Token JWT
-        user_id = get_jwt_identity()
-
         # Busca o usuário no banco de dados
         usuario = Usuario.query.get(user_id)
 
