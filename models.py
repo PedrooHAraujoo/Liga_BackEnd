@@ -121,6 +121,7 @@ class Usuario(db.Model):
     status = db.Column(db.String, default='pendente', nullable=False)
     pontuacao_total = db.Column(db.Integer, default=0, nullable=False)
     ranking_atual_id = db.Column(db.Integer, db.ForeignKey('rankings.id'), nullable=True)
+    imagem_perfil = db.Column(db.String, nullable=True) # Adiciona o campo da imagem do perfil
 
     # Relacionamento muitos-para-muitos com Ranking
     ranking_atual = db.relationship('Ranking', secondary=usuario_ranking_association, back_populates='usuarios', overlaps="ranking_atual,usuarios") 
@@ -138,5 +139,6 @@ class Usuario(db.Model):
             "status": self.status,
             "pontuacao_total": self.pontuacao_total,
             "ranking_atual": [ranking.to_dict() for ranking in self.ranking_atual] if self.ranking_atual else None, # Lista de rankings
-            "equipe": self.equipe.to_dict() if self.equipe else None # Verifica se a equipe é None
+            "equipe": self.equipe.to_dict() if self.equipe else None, # Verifica se a equipe é None
+            "imagem_perfil": self.imagem_perfil 
         }

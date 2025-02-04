@@ -1,5 +1,5 @@
 import os
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, jsonify, current_app, send_from_directory
 from functools import wraps
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import Usuario
@@ -25,7 +25,7 @@ def verificar_jwt(f):
                 return jsonify({'error': 'Token inválido ou expirado'}), 401
         except Exception as e:
             return jsonify({'error': f'Erro na autenticação: {str(e)}'}), 401
-        return f(user_id, *args, **kwargs, user_id=user_id)
+        return f(user_id, *args, **kwargs)
     return decorated_functions
 
 # Rota para cadastro de usuário
@@ -86,9 +86,18 @@ def visualizar_perfil(user_id):
                 'status': 'fail'
             }), 404
         
+        # Verifica se o atributo imagem_perfil existe e não é None
+        if hasattr(usuario, 'imagem_perfil') and usuario.imagem_perfil:
+            imagem_url = f"{request.host_url}uploads/{os.path.basename(usuario.imagem_perfil)}"
+        else:
+            imagem_url = None    
+
         # Retorna o perfil do usuario como JSON
-        return jsonify(usuario.to_dict()), 200
-    
+        perfil_dict = usuario.to_dict()
+        perfil_dict['imagem_perfil'] = imagem_url
+
+        return jsonify(perfil_dict), 200
+            
     except Exception as e:
         # Loga e retorna o erro
         print(f"Erro ao acessar perfil: {e}")
@@ -105,7 +114,7 @@ def editar_perfil(user_id):
     nome = data.get('nome')
     email = data.get('email')
     instagram = data.get('instagram')
-    resultado, status_code = atualizar_usuario(user_id,nome, email, instagram)
+    resultado, status_code = atualizar_usuario(user_id, nome, email, instagram)
     return jsonify(resultado), status_code
 
 # Rota para upload de imagem de perfil
@@ -132,3 +141,8 @@ def upload_imagem(user_id):
     if status == 200:
         resultado['imagem_url'] = f"/api/uploads/{os.path.basename(resultado['imagem_url'])}"
     return jsonify(resultado), status
+
+# Rota para servir imagens
+@app_routes.route('/uploads/<filename>', methods=['GET'])
+def uploaded_file(filename):
+    return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)
