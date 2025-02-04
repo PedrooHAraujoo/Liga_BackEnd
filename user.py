@@ -53,7 +53,7 @@ def adicionar_usuario(nome, email, senha, cargo, equipe, instagram):
                 print(f"Equipe do usuário {usuario_atualizado.nome} não foi associada corretamente")
 
         # Associa o ranking ao novo usuário
-        if cargo.lower() == 'admin' ou cargo.lower() == 'suporte':
+        if cargo.lower() == 'admin' or cargo.lower() == 'suporte':
             ranking = Ranking.query.filter_by(nome_ranking="Admin e Suporte").first()
         elif cargo.lower() == 'gerente':
             ranking = Ranking.query.filter_by(nome_ranking="Gerentes").first()
