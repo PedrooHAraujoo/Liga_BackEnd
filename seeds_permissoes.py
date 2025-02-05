@@ -47,9 +47,9 @@ def associar_permissoes():
             'visualizar_rankings', 'visualizar_pontuacoes', 
             'listar_pontuacoes', 'listar_equipes'
         ],
-        'Suporte': [
-            'visualizar_usuarios', 'listar_usuarios'
-        ]
+        'Captador': [
+            'visualizar_rankings', 'visualizar_pontuacoes', 
+            'listar_pontuacoes', 'listar_equipes']
     }
 
     for cargo_nome, permissoes in permissoes_por_cargo.items():

@@ -17,7 +17,7 @@ def adicionar_usuario(nome, email, senha, cargo, equipe, instagram):
         cargo_existente = Cargo.query.filter_by(nome=cargo).first()
         if not cargo_existente:
             return {'error': f'Cargo inválido: Cargo={cargo}', 'status': 'fail'}, 400
-        status_usuario = 'aprovado' if cargo.lower() in ['admin', 'suporte'] else 'pendente'
+        status_usuario = 'aprovado' if cargo.lower() in ['admin'] else 'pendente'
         # Cria o novo usuário sem equipe inicialmente
         novo_usuario = Usuario(
             nome=nome,
@@ -36,7 +36,7 @@ def adicionar_usuario(nome, email, senha, cargo, equipe, instagram):
         print(f"Usuário {novo_usuario.nome} adicionado com ID: {novo_usuario.id}")
 
         # Associa a equipe, exceto se for Admin ou Suporte
-        if cargo.lower() not in ['admin', 'suporte']:
+        if cargo.lower() not in ['admin']:
             equipe_existente = Equipe.query.filter_by(nome=equipe).first()
             if not equipe_existente:
                 return {'error': f'Equipe inválida: Equipe={equipe}', 'status': 'fail'}, 400
@@ -53,8 +53,8 @@ def adicionar_usuario(nome, email, senha, cargo, equipe, instagram):
                 print(f"Equipe do usuário {usuario_atualizado.nome} não foi associada corretamente")
 
         # Associa o ranking ao novo usuário
-        if cargo.lower() == 'admin' or cargo.lower() == 'suporte':
-            ranking = Ranking.query.filter_by(nome_ranking="Admin e Suporte").first()
+        if cargo.lower() == 'admin':
+            ranking = Ranking.query.filter_by(nome_ranking="Admin").first()
         elif cargo.lower() == 'gerente':
             ranking = Ranking.query.filter_by(nome_ranking="Gerentes").first()
         else:
