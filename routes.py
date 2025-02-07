@@ -1,18 +1,18 @@
 import os
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, jsonify, current_app, send_from_directory
 from functools import wraps
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import Usuario
 from user import (
     adicionar_usuario, login_usuario, redefinir_senha, verificar_token, 
-    obter_usuario, atualizar_usuario, salvar_imagem_perfil
+    atualizar_usuario, salvar_imagem_perfil
 )
 
 # Inicializa o Blueprint para as rotas
 app_routes = Blueprint('app_routes', __name__)
 
 # Decorador para verificar o JWT
-def jwt_required(f):
+def verificar_jwt(f):
     @wraps(f)
     def decorated_functions(*args, **kwargs):
         token = request.headers.get('Authorization')
@@ -74,46 +74,52 @@ def login():
 
 # Rota para o perfil do usuario
 @app_routes.route('/perfil', methods=['GET'])
-@jwt_required
+@verificar_jwt
 def visualizar_perfil(user_id):
     try:
         # Busca o usuário no banco de dados
         usuario = Usuario.query.get(user_id)
 
         if not usuario:
-            return jsonify({"erro": "Usuário não encontrado"}), 404
+            return jsonify({
+                'error': 'Usuario não encontrado',
+                'status': 'fail'
+            }), 404
+        
+        # Verifica se o atributo imagem_perfil existe e não é None
+        if hasattr(usuario, 'imagem_perfil') and usuario.imagem_perfil:
+            imagem_url = f"{request.host_url}uploads/{os.path.basename(usuario.imagem_perfil)}"
+        else:
+            imagem_url = None    
 
-        # Retorna o perfil do usuário como JSON
-        return jsonify({
-            "id": usuario.id,
-            "nome": usuario.nome,
-            "email": usuario.email,
-            "status": usuario.status,
-            "equipe": usuario.equipe.nome if usuario.equipe else None,
-            "cargo": usuario.cargo.nome if usuario.cargo else None,
-            "instagram": usuario.instagram
-        }), 200
+        # Retorna o perfil do usuario como JSON
+        perfil_dict = usuario.to_dict()
+        perfil_dict['imagem_perfil'] = imagem_url
 
+        return jsonify(perfil_dict), 200
+            
     except Exception as e:
         # Loga e retorna o erro
         print(f"Erro ao acessar perfil: {e}")
-        return jsonify({"erro": "Erro ao acessar perfil"}), 500
+        return jsonify({
+            "erro": "Erro ao acessar perfil",
+            "status": "fail"
+        }), 500
 
-
-# Rota para editar o perfil
+# Rota para editar o perfil 
 @app_routes.route('/perfil/editar', methods=['PUT'])
-@jwt_required
+@verificar_jwt
 def editar_perfil(user_id):
     data = request.json
     nome = data.get('nome')
     email = data.get('email')
     instagram = data.get('instagram')
-    resultado, status_code = atualizar_usuario(user_id,nome, email, instagram)
+    resultado, status_code = atualizar_usuario(user_id, nome, email, instagram)
     return jsonify(resultado), status_code
 
 # Rota para upload de imagem de perfil
 @app_routes.route('/perfil/upload_imagem', methods=['POST'])
-@jwt_required
+@verificar_jwt
 def upload_imagem(user_id):
     if 'imagem' not in request.files:
         return jsonify({
@@ -135,3 +141,8 @@ def upload_imagem(user_id):
     if status == 200:
         resultado['imagem_url'] = f"/api/uploads/{os.path.basename(resultado['imagem_url'])}"
     return jsonify(resultado), status
+
+# Rota para servir imagens
+@app_routes.route('/uploads/<filename>', methods=['GET'])
+def uploaded_file(filename):
+    return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)

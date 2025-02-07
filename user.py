@@ -1,7 +1,6 @@
 import bcrypt
 import jwt
 import datetime
-from flask import current_app
 from models import db, Usuario, Cargo, Equipe, Ranking
 from werkzeug.utils import secure_filename
 from flask import jsonify
@@ -18,7 +17,7 @@ def adicionar_usuario(nome, email, senha, cargo, equipe, instagram):
         cargo_existente = Cargo.query.filter_by(nome=cargo).first()
         if not cargo_existente:
             return {'error': f'Cargo inválido: Cargo={cargo}', 'status': 'fail'}, 400
-
+        status_usuario = 'aprovado' if cargo.lower() in ['admin'] else 'pendente'
         # Cria o novo usuário sem equipe inicialmente
         novo_usuario = Usuario(
             nome=nome,
@@ -26,7 +25,7 @@ def adicionar_usuario(nome, email, senha, cargo, equipe, instagram):
             senha=senha_hashed,
             cargo=cargo_existente,
             instagram=instagram,
-            status='pendente',
+            status=status_usuario,
             pontuacao_total=0
         )
 
@@ -37,7 +36,7 @@ def adicionar_usuario(nome, email, senha, cargo, equipe, instagram):
         print(f"Usuário {novo_usuario.nome} adicionado com ID: {novo_usuario.id}")
 
         # Associa a equipe, exceto se for Admin ou Suporte
-        if cargo.lower() not in ['admin', 'suporte']:
+        if cargo.lower() not in ['admin']:
             equipe_existente = Equipe.query.filter_by(nome=equipe).first()
             if not equipe_existente:
                 return {'error': f'Equipe inválida: Equipe={equipe}', 'status': 'fail'}, 400
@@ -46,28 +45,32 @@ def adicionar_usuario(nome, email, senha, cargo, equipe, instagram):
             db.session.commit()  # Atualiza o usuário com a equipe
             print(f"Usuário {novo_usuario.nome} associado à equipe: {novo_usuario.equipe.nome}")
 
-        # Verifica se a equipe foi associada corretamente (apenas para cargos que não sejam Admin ou Suporte)
-        if cargo.lower() not in ['admin', 'suporte']:
+            # Verifica se a equipe foi associada corretamente
             usuario_atualizado = Usuario.query.get(novo_usuario.id)
             if usuario_atualizado.equipe:
                 print(f"Equipe do usuário {usuario_atualizado.nome}: {usuario_atualizado.equipe.nome}")
             else:
                 print(f"Equipe do usuário {usuario_atualizado.nome} não foi associada corretamente")
 
-        # Adiciona o ranking inicial "Nenhum" ao novo usuário
-        ranking_inicial = Ranking(
-            usuario_id=novo_usuario.id,
-            nome_ranking="Nenhum",
-            meta_pontuacao=0
-        )
+        # Associa o ranking ao novo usuário
+        if cargo.lower() == 'admin':
+            ranking = Ranking.query.filter_by(nome_ranking="Admin").first()
+        elif cargo.lower() == 'gerente':
+            ranking = Ranking.query.filter_by(nome_ranking="Gerentes").first()
+        else:
+            ranking = Ranking.query.filter_by(nome_ranking="Nenhum").first()
 
-        db.session.add(ranking_inicial)
-        novo_usuario.ranking_atual = ranking_inicial
+        if not ranking:
+            return {'error': f'Ranking "{ranking.nome_ranking}" não encontrado.', 'status': 'fail'}, 400
+
+        # Atualiza o campo ranking_atual_id e adiciona o ranking à lista de rankings
+        novo_usuario.ranking_atual_id = ranking.id
+        novo_usuario.ranking_atual.append(ranking)
         db.session.commit()
 
         # Verifica se o ranking foi associado corretamente
         if novo_usuario.ranking_atual:
-            print(f"Ranking do usuário {novo_usuario.nome}: {novo_usuario.ranking_atual.nome_ranking}")
+            print(f"Ranking do usuário {novo_usuario.nome}: {[r.nome_ranking for r in novo_usuario.ranking_atual]}")
         else:
             print(f"Ranking do usuário {novo_usuario.nome} não foi associado corretamente")
 
@@ -78,25 +81,23 @@ def adicionar_usuario(nome, email, senha, cargo, equipe, instagram):
         return {'error': f'Ocorreu um erro no banco de dados: {str(e)}', 'status': 'fail'}, 500
 
 def redefinir_senha(email, nova_senha):
-
     senha_hashed = bcrypt.hashpw(nova_senha.encode('UTF-8'), bcrypt.gensalt())
 
     try:
         usuario_existente = Usuario.query.filter_by(email=email).first()
         if not usuario_existente:
-            return{'error': 'Usuário não encontrado', "status" : 'fail'}, 404
+            return {'error': 'Usuário não encontrado', 'status': 'fail'}, 404
         
         # Atualiza a senha do usuário
         usuario_existente.senha = senha_hashed
         db.session.commit()
 
-        return{'message' : 'Senha redefinida com sucesso!', 'status': 'sucess'},200
+        return {'message': 'Senha redefinida com sucesso!', 'status': 'success'}, 200
     
     except Exception as e:
+        db.session.rollback()  # Reverte a transação 
 
-        db.session.rollback() # Reverte a transação 
-
-        return{'error' : f'Ocorreu um erro no banco de dados: {str(e)}', 'status': 'fail'}, 500   
+        return {'error': f'Ocorreu um erro no banco de dados: {str(e)}', 'status': 'fail'}, 500
 
 def login_usuario(email, senha):
     try:
@@ -117,12 +118,12 @@ def login_usuario(email, senha):
         return {'error': f'Ocorreu um erro no banco de dados: {str(e)}', 'status': 'fail'}, 500
 
 def gerar_token(user_id):
-    payload ={
+    payload = {
         'sub': str(user_id),
-        'iat': datetime.datetime.utcnow(), # Registra o hor[ario em que o token foi gerado
-        'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1) # Token expira em 1 hora
+        'iat': datetime.datetime.utcnow(),  # Registra o horário em que o token foi gerado
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1)  # Token expira em 1 hora
     }
-    token = jwt.encode(payload, os.getenv('SECRET_KEY'),'HS256')
+    token = jwt.encode(payload, os.getenv('SECRET_KEY'), 'HS256')
     return token
 
 def verificar_token(token):
@@ -134,20 +135,18 @@ def verificar_token(token):
             algorithms=['HS256'],
         )
         
-        return int(decoded.get('sub')) # Retorna o id do usuário
+        return int(decoded.get('sub'))  # Retorna o id do usuário
     
     except jwt.ExpiredSignatureError:
-        print("Token expirado") 
+        print("Token expirado")
         return None
     except jwt.InvalidTokenError as e:
         print(f"Erro de token: {type(e)} - {e}")
         return None
 
-
 def obter_usuario(user_id):
     try:
         # Consulta o usuário pelo id
-
         usuario = Usuario.query.get(user_id)
         if not usuario:
             return {'error': 'Usuário não encontrado', 'status': 'fail'}, 404
@@ -161,7 +160,7 @@ def obter_usuario(user_id):
     
     except Exception as e:
         return {'error': f'Ocorreu um erro no banco de dados: {str(e)}', 'status': 'fail'}, 500
-    
+
 def atualizar_usuario(user_id, nome, email, instagram):
     try:
         usuario = Usuario.query.get(user_id)
@@ -172,7 +171,7 @@ def atualizar_usuario(user_id, nome, email, instagram):
         usuario.instagram = instagram if instagram else usuario.instagram
         db.session.commit()
         
-        # Retorna os dados atualizados passando pelo metodo to_dict()
+        # Retorna os dados atualizados passando pelo método to_dict()
         dados_usuario = usuario.to_dict()
         dados_usuario['message'] = 'Perfil atualizado com sucesso!'
         dados_usuario['status'] = 'success'
@@ -193,16 +192,17 @@ def validar_extensao(arquivo):
 
 def salvar_imagem_perfil(user_id, imagem, upload_folder):
     try:
-        
         # Valida a extensão do arquivo
         if not validar_extensao(imagem.filename):
             return jsonify({
                 'status': 'error',
-                'message': 'A extensão do arquivo fornecido é inválido',
-                'details': 'Apenas arquivos com as extensões .png, . .jpg, .jpeg são permitidos'
+                'message': 'A extensão do arquivo fornecido é inválida',
+                'details': 'Apenas arquivos com as extensões .png, .jpg, .jpeg são permitidos'
             }), 400
+        
         # Para uso de debug (para ver o valor de upload_folder)
         print(f"UPLOAD_FOLDER: {upload_folder}")
+
         # Certifica-se de que o diretório de upload existe
         if not os.path.exists(upload_folder):
             os.makedirs(upload_folder)
@@ -211,7 +211,7 @@ def salvar_imagem_perfil(user_id, imagem, upload_folder):
         filename = secure_filename(f'{user_id}_{imagem.filename}')
         filepath = os.path.join(upload_folder, filename)
 
-        # Salva a imagem no caminho especificado(upload_folder/ filename)
+        # Salva a imagem no caminho especificado (upload_folder/filename)
         imagem.save(filepath)
     
         # Salvar caminho no banco de dados

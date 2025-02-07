@@ -5,6 +5,36 @@ from permissoes import verificar_permissao # Decorador para verificar permissõe
 from user import *
 painel_bp = Blueprint('painel', __name__)
 
+# Endpoint do painel Administração
+@painel_bp.route('/admin', methods=['GET'])
+@verificar_permissao('acessar_tudo') # Aoebas administradores com a permisão 'acessar_tudo'
+def painel_admin():
+    return jsonify({
+        'message': 'Bem vindo ao Painel de Administração!',
+        'funções_disponíveis': [
+            'Gerenciar Equipes',
+            'Gerenciar Rankings',
+            'Gerenciar Usuários',
+            'Visualizar Logs',
+            'Aprovar usuários',
+            'Criar Cargo',
+            'Criar Permissão',
+            'Editar Cargo',
+            'Editar Permissão',
+            'Deletar Cargo',
+            'Deletar Permissão',
+            'Criar Pontuação',
+            'Editar Pontuação',
+            'Deletar Pontuação',
+            'Visualizar Histórico',
+            'Listar Equipes',
+            'Listar Rankings',
+            'Listar Pontuações',
+            'Visualizar Pontuações',
+            'Listar Usuários',
+            'Visualizar Usuários'
+        ]
+    }), 200
 # Endpoints para Equipe
 @painel_bp.route('/equipe', methods=['POST'])
 @verificar_permissao('gerenciar_equipes') # Apenas os usuários com a permissão 'gerenciar_equipes' pode acessar
